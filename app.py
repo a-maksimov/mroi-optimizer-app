@@ -1,12 +1,12 @@
 import streamlit as st
-from read_data import read_data
-from render_spec import render_spec
+import read_data
+import render_spec
 
 st.set_page_config(page_title='MROI Optimizer App',
                    page_icon=':chart_with_upwards_trend:',
                    layout='wide')
 
-df = render_spec(read_data())
+df = render_spec.render_spec(read_data.read_data())
 
 # ---- MAINPAGE ----
 st.title(':chart_with_upwards_trend: MROI Optimizer App')
