@@ -1,49 +1,39 @@
 import streamlit as st
-from datetime import datetime
-import read_data
+from read_data import read_data
+from render_spec import render_spec
 
-date_format = '%d.%m.%Y'
+st.set_page_config(page_title='MROI Optimizer App',
+                   page_icon=':chart_with_upwards_trend:',
+                   layout='wide')
 
-st.set_page_config(page_title='mroi-optimizer-app', page_icon=':bar_chart:', layout='wide')
+df = render_spec(read_data())
 
-df = read_data.read_data()
+# ---- MAINPAGE ----
+st.title(':chart_with_upwards_trend: MROI Optimizer App')
+st.markdown("##")
 
-# ---- SIDEBAR ----
-st.sidebar.header('Пользовательский ввод')
-# Date UI
-# Create date range input widget
-start_date = df[read_data.Date_var].min()
-end_date = df[read_data.Date_var].max()
+# TOP KPI's
+total_spend = df['Spend'].sum()
+total_contribution = df['Contribution'].sum()
+total_revenue = df['Revenue_Calculated'].sum()
+total_romi = total_revenue/total_spend
 
-date_range = st.sidebar.date_input(
-    'Выберите интервал анализа',
-    min_value=start_date,
-    max_value=end_date,
-    value=(start_date, end_date),
-    key='date_range'
-)
+left_column, middle_column1, middle_column2, right_column = st.columns(4)
+with left_column:
+    st.subheader('Затраты на медиа:')
+    st.subheader(f'€ {round(total_spend / 1e6, 2)} M')
+with middle_column1:
+    st.subheader('Общий вклад:')
+    st.subheader(f'{round(total_contribution / 1000, 2)}k KG')
+with middle_column2:
+    st.subheader(' Рассчитанный доход')
+    st.subheader(f'€ {round(total_revenue / 1e6, 2)} M')
+with right_column:
+    st.subheader('ROMI:')
+    st.subheader(f'{round(total_romi, 2)}')
 
-# ---- SIDEBAR ----
-granularity = st.sidebar.multiselect(
-    'Выберите гранулярность',
-    options=read_data.granularity_levels,
-    default=read_data.granularity_levels
-)
+st.markdown("""---""")
 
-periodicity = st.sidebar.multiselect(
-    'Выберите периодичность',
-    options=['Weekly', 'Monthly', 'Yearly'],
-    default='Weekly'
-)
+st.dataframe(df, height=600, use_container_width=True)
 
-channel = st.sidebar.multiselect(
-    'Выберите каналы',
-    options=df['Channel'].unique(),
-    default=df['Channel'].unique()
-)
 
-df_selection = df.query(
-    'Channel in @channel & (@date_range[0] <= Date <= @date_range[1])'
-)
-
-st.dataframe(df_selection)
