@@ -40,13 +40,14 @@ def render_sidebar(dataframe):
     granularity = st.sidebar.multiselect(
         'Выберите гранулярность',
         options=granularity_dict,
-        default='Channel'
+        default=granularity_dict
     )
 
     if 'Channel' in granularity:
         channels = st.sidebar.multiselect(
             'Выберите медиа-каналы',
             options=granularity_dict['Channel'],
+            default=granularity_dict['Channel']
         )
         selection_dict['Channel'] = channels
 
@@ -54,6 +55,7 @@ def render_sidebar(dataframe):
         dealerships = st.sidebar.multiselect(
             'Выберите источники данных',
             options=granularity_dict['Dealership'],
+            default=granularity_dict['Dealership']
         )
         selection_dict['Dealership'] = dealerships
 
@@ -61,6 +63,7 @@ def render_sidebar(dataframe):
         formats = st.sidebar.multiselect(
             'Выберите медиа-форматы',
             options=granularity_dict['Format'],
+            default=granularity_dict['Format']
         )
         selection_dict['Format'] = formats
 
@@ -68,6 +71,7 @@ def render_sidebar(dataframe):
         products = st.sidebar.multiselect(
             'Выберите продукты',
             options=granularity_dict['Product'],
+            default=granularity_dict['Product']
         )
         selection_dict['Product'] = products
 
