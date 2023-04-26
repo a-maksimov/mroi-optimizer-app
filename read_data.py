@@ -3,6 +3,7 @@ import pandas as pd
 # user inputs
 numeric_variables = ['Contribution', 'Spend', 'Revenue_Calculated', 'Marginal_Contribution']
 granularity_levels = ['Channel', 'Dealership', 'Format', 'Product']
+periodicity_list = ['Weekly', 'Monthly', 'Yearly']
 simulated_color_plot = 'teal'  # should be same as in CSS
 optimised_color_plot = 'coral'  # should be same as in CSS
 editable_columns_color = '#ECF0F1'
@@ -25,9 +26,8 @@ def read_data():
 
     # split weekly data to month and year granularity
     cp_spend['Date'] = pd.to_datetime(cp_spend['Date'])
-    cp_spend['Weekly'] = cp_spend['Date'].dt.to_period('W')
-    cp_spend['Monthly'] = cp_spend['Date'].dt.strftime('%m-%Y')
-    cp_spend['Yearly'] = cp_spend['Date'].dt.strftime('%Y')
+    for periodicity in periodicity_list:
+        cp_spend[periodicity] = cp_spend['Date'].dt.to_period(periodicity[0])
 
     return cp_spend
 

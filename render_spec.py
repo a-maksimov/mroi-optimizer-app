@@ -17,7 +17,13 @@ def render_spec(dataframe):
 
     for granularity_level in reversed(granularity_levels):
         if selection_dict[granularity_level]:
-            df_selection = df_selection.groupby([granularity_level, selection_dict['Periodicity']])[numeric_variables].sum()
+            df_selection = df_selection.groupby([selection_dict['Periodicity'], granularity_level])[numeric_variables].sum()
             break
 
-    return df_selection.sort_values(selection_dict['Periodicity'])
+    df_selection = df_selection.reset_index()  # reset index after groupby()
+
+    df_selection = df_selection.set_index(selection_dict['Periodicity'])  # set index according to selected periodicity
+
+    df_selection = df_selection.sort_index()  # sort values according to set index
+
+    return df_selection

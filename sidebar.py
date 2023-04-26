@@ -33,7 +33,7 @@ def render_sidebar(dataframe):
     periodicity = st.sidebar.selectbox(
         'Выберите периодичность',
         options=['Weekly', 'Monthly', 'Yearly'],
-        index=0
+        index=1
     )
     selection_dict['Periodicity'] = periodicity
 
@@ -45,7 +45,7 @@ def render_sidebar(dataframe):
 
     if 'Channel' in granularity:
         channels = st.sidebar.multiselect(
-            'Выберите каналы',
+            'Выберите медиа-каналы',
             options=granularity_dict['Channel'],
             default=granularity_dict['Channel']
         )
