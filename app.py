@@ -1,7 +1,5 @@
 import streamlit as st
-import menu
-from options_menu import about, specification, planning
-
+from options_menu import menu, about, specification
 
 st.set_page_config(page_title='MROI Optimizer App',
                    page_icon=':chart_with_upwards_trend:',
