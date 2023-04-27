@@ -3,6 +3,10 @@ import read_data
 import render_spec
 
 
+def convert_df(dataframe):
+    return dataframe.to_csv(index=False).encode('utf-8')
+
+
 def spec_page():
     df = render_spec.render_spec(read_data.read_data())
 
@@ -20,10 +24,10 @@ def spec_page():
         st.subheader('Общий вклад:')
         st.subheader(f'{round(total_contribution / 1000, 2)}k KG')
     with middle_column2:
-        st.subheader('Рассчитанный доход')
+        st.subheader('Рассчитанный доход:')
         st.subheader(f'€ {round(total_revenue / 1e6, 2)} M')
     with right_column:
-        st.subheader('ROMI:')
+        st.subheader('MROI:')
         st.subheader(f'{round(total_romi, 2)}')
 
     st.markdown('''---''')
@@ -59,5 +63,15 @@ def spec_page():
 
     # display df
     st.dataframe(df_display, height=600, use_container_width=True)
+
+    csv = convert_df(df_display)
+
+    st.download_button(
+        'Экспорт таблицы',
+        csv,
+        'df_display.csv',
+        'text/csv',
+        key='download-csv'
+    )
 
     return spec_page

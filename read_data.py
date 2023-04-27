@@ -2,11 +2,8 @@ import pandas as pd
 
 # user inputs
 numeric_variables = ['Contribution', 'Spend', 'Revenue_Calculated', 'Marginal_Contribution']
-granularity_levels = ['Channel', 'Dealership', 'Format', 'Product']
+granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 periodicity_list = ['Weekly', 'Monthly', 'Yearly']
-simulated_color_plot = 'teal'  # should be same as in CSS
-optimised_color_plot = 'coral'  # should be same as in CSS
-editable_columns_color = '#ECF0F1'
 
 
 def read_data():
@@ -32,8 +29,10 @@ def read_data():
     return cp_spend
 
 
-def get_levels_of_granularity(dataframe):
-    granularity_dict = {}
-    for granularity in granularity_levels:
-        granularity_dict[granularity] = list(pd.unique(dataframe[granularity]))
-    return granularity_dict
+def get_level_of_granularity(dataframe, current_level, prev_levels_dict=None):
+    if prev_levels_dict:
+        # filter dataframe by selections
+        for level in prev_levels_dict:
+            if level in dataframe.columns:
+                dataframe = dataframe[dataframe[level].isin(prev_levels_dict[level])]
+    return list(pd.unique(dataframe[current_level]))  # create a list of unique values in filtered dataframe
