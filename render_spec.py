@@ -19,12 +19,14 @@ def render_spec(dataframe):
     # group by the last of non-empty granularity levels
     for granularity_level in reversed(granularity_levels):
         if selection_dict[granularity_level]:
-            df_selection = df_selection.groupby([selection_dict['Periodicity'], granularity_level])[numeric_variables].sum()
+            df_selection = df_selection.groupby([selection_dict['Periodicity'],
+                                                 granularity_level])[list(numeric_variables)].sum()
             break
     else:
-        df_selection = df_selection.groupby([selection_dict['Periodicity']] + granularity_levels)[numeric_variables].sum()
+        df_selection = df_selection.groupby([selection_dict['Periodicity']] +
+                                            granularity_levels)[list(numeric_variables)].sum()
 
-    df_selection = df_selection.reset_index()  # reset index after groupby()
+    df_selection = df_selection.reset_index()  # reset index after group by
 
     df_selection = df_selection.set_index(selection_dict['Periodicity'])  # set index according to selected periodicity
 
