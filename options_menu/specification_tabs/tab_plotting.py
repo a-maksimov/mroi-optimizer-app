@@ -8,7 +8,7 @@ import read_data
 
 def spec_plotting_tab(dataframe):
     # create a list of column names to plot
-    columns_to_plot = st.multiselect(_('Select variables'),
+    columns_to_plot = st.multiselect(_('Select indicators'),
                                      [_(variable) for variable in read_data.numeric_variables])
     granularity_to_plot = st.multiselect(_('Select granularity'), list(pd.unique(dataframe.iloc[:, 0])))
 
