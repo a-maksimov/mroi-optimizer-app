@@ -1,18 +1,17 @@
 import streamlit as st
 from collections import defaultdict
+from translations import _, set_language
 import read_data
+
+languages = {'Русский': 'ru_RU', 'English': 'en_US'}
 
 
 def render_date(dataframe):
     # Date UI
     start_date = dataframe['Date'].min()
     end_date = dataframe['Date'].max()
-    if read_data.language == 'ru':
-        label = 'Выберите интервал анализа'
-    else:
-        label = 'Select analysis date range'
     date_range = st.sidebar.date_input(
-        label,
+        _('Select analysis date range'),
         min_value=start_date,
         max_value=end_date,
         value=(start_date, end_date),
@@ -22,7 +21,7 @@ def render_date(dataframe):
 
 
 def clear_multi():
-    """Resets widgets with Session State API"""
+    """ Resets widgets with Session State API """
     st.session_state['granularity'] = []
     st.session_state['granularity_checkbox'] = False
     st.session_state['dealerships'] = []
@@ -41,11 +40,7 @@ def create_multiselect(label, key, options, default=None, value=False) -> list:
     value (bool): default value of the checkbox
     """
     container = st.sidebar.container()
-    if read_data.language == 'ru':
-        inner_label = 'Выбрать все'
-    else:
-        inner_label = 'Select all'
-    select_all = st.sidebar.checkbox(inner_label, value=value, key=key + '_checkbox')
+    select_all = st.sidebar.checkbox(_('Select all'), value=value, key=key + '_checkbox')
 
     if select_all:
         ms = container.multiselect(
@@ -65,46 +60,36 @@ def create_multiselect(label, key, options, default=None, value=False) -> list:
 
 
 def render_sidebar(dataframe):
-    if read_data.language == 'ru':
-        label = 'Пользовательский ввод'
-    else:
-        label = 'User inputs'
-    st.sidebar.header(label)
+    # set up the translation selection
+    language = st.sidebar.selectbox(_('Language'), languages, key='language')
+
+    # update the translation object based on the selected language
+    if language:
+        set_language(languages[language])
+
+    st.sidebar.header(_('User inputs'))
+
     selection_dict = defaultdict(list)
 
     # Create date range input widget
     start_date, end_date = render_date(dataframe)
     selection_dict.update({'Start_date': start_date, 'End_date': end_date})
-    if read_data.language == 'ru':
-        options = read_data.periodicity_dict.keys()
-        label = 'Выберите периодичность'
-    else:
-        options = read_data.periodicity_dict.values()
-        label = 'Select Periodicity'
     periodicity = st.sidebar.selectbox(
-        label,
-        options=options,
+        _('Select Periodicity'),
+        options=[_(periodicity) for periodicity in read_data.periodicity_list],
         index=0
     )
     selection_dict['Periodicity'] = periodicity
 
     # Create button to clear the multiselect widgets
-    if read_data.language == 'ru':
-        label = 'Очистить все'
-    else:
-        label = 'Clear all'
-    st.sidebar.button(label, on_click=clear_multi)
+    st.sidebar.button(_('Clear all'), on_click=clear_multi)
 
     # Create filters
-    granularity = create_multiselect('Выберите гранулярность', 'granularity', read_data.granularity_levels)
+    granularity = create_multiselect(_('Select granularity'), 'granularity', read_data.granularity_levels)
 
     if 'Dealership' in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe, 'Dealership')
-        if read_data.language == 'ru':
-            label = 'Выберите источники данных'
-        else:
-            label = 'Select dealerships'
-        dealerships = create_multiselect(label, 'dealerships', granularity_list)
+        dealerships = create_multiselect(_('Select dealerships'), 'dealerships', granularity_list)
         selection_dict['Dealership'] = dealerships
 
     if 'Channel' in granularity:
@@ -112,32 +97,20 @@ def render_sidebar(dataframe):
                                                               'Channel',
                                                               selection_dict
                                                               )
-        if read_data.language == 'ru':
-            label = 'Выберите медиа-каналы'
-        else:
-            label = 'Select channels'
-        selection_dict['Channel'] = create_multiselect(label, 'channels', granularity_list)
+        selection_dict['Channel'] = create_multiselect(_('Select channels'), 'channels', granularity_list)
 
     if 'Format' in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
                                                               'Format',
                                                               selection_dict
                                                               )
-        if read_data.language == 'ru':
-            label = 'Выберите медиа-форматы'
-        else:
-            label = 'Select formats'
-        selection_dict['Format'] = create_multiselect(label, 'formats', granularity_list)
+        selection_dict['Format'] = create_multiselect(_('Select_formats'), 'formats', granularity_list)
 
     if 'Product' in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
                                                               'Product',
                                                               selection_dict
                                                               )
-        if read_data.language == 'ru':
-            label = 'Выберите продукты'
-        else:
-            label = 'Select products'
-        selection_dict['Product'] = create_multiselect(label, 'products', granularity_list)
+        selection_dict['Product'] = create_multiselect(_('Select products'), 'products', granularity_list)
 
     return selection_dict

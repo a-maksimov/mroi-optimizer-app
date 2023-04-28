@@ -1,0 +1,148 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Language: en_US\n"
+
+msgid "Dealership"
+msgstr "Источник данных"
+
+msgid "Channel"
+msgstr "Медиа-канал"
+
+msgid "Format"
+msgstr "Медиа-формат"
+
+msgid "Product"
+msgstr "Продукт"
+
+msgid "Contribution"
+msgstr "Вклад"
+
+msgid "Spend"
+msgstr "Расход"
+
+msgid "Revenue"
+msgstr "Доход"
+
+msgid "Revenue_Calculated"
+msgstr "Рассчитанный доход"
+
+msgid "Marginal_Contribution"
+msgstr "Предельный вклад"
+
+msgid "Weekly"
+msgstr "Неделя"
+
+msgid "Monthly"
+msgstr "Месяц"
+
+msgid "Yearly"
+msgstr "Год"
+
+msgid "Select analysis date range"
+msgstr "Выберите временной интервал анализа"
+
+msgid "Select all"
+msgstr "Выбрать все"
+
+msgid "Clear all"
+msgstr "Очистить все"
+
+msgid "User inputs"
+msgstr "Пользовательский ввод"
+
+msgid "Select Periodicity"
+msgstr "Выберите периодичность"
+
+msgid "Select granularity"
+msgstr "Выберите гранулярность"
+
+msgid "Select dealerships"
+msgstr "Выберите источники данных"
+
+msgid "Select channels"
+msgstr "Выберите медиа-каналы"
+
+msgid "Select formats"
+msgstr "Выберите медиа-форматы"
+
+msgid "Select products"
+msgstr "Выберите продукты"
+
+msgid "Total budget"
+msgstr "Затраты на медиа"
+
+msgid "Total contribution"
+msgstr "Общий вклад"
+
+msgid "Total calculated revenue"
+msgstr "Общий рассчитанный доход"
+
+msgid "Table"
+msgstr "Таблица"
+
+msgid "Plotting"
+msgstr "Графики"
+
+msgid "Export table"
+msgstr "Экспорт таблицы"
+
+msgid "About"
+msgstr "О приложении"
+
+msgid "Specification"
+msgstr "Спецификация"
+
+msgid "Planning"
+msgstr "Планирование"
+
+msgid "Brand"
+msgstr "Бренд"
+
+msgid "Biscuits"
+msgstr "Бисквиты"
+
+msgid "Bread"
+msgstr "Хлеб"
+
+msgid "Cake"
+msgstr "Пирожные"
+
+msgid "Rusks"
+msgstr "Сухари"
+
+msgid "Product_1"
+msgstr "Продукт_1"
+
+msgid "Product_2"
+msgstr "Продукт_2"
+
+msgid "Product_3"
+msgstr "Продукт_3"
+
+msgid "Product_4"
+msgstr "Продукт_4"
+
+msgid "Product_5"
+msgstr "Продукт_5"
+
+msgid "Category_1"
+msgstr "Категория_1"
+
+msgid "Category_2"
+msgstr "Категория_2"
+
+msgid "Select variables"
+msgstr "Выберите переменные"
+
+msgid "k"
+msgstr "тыс."
+
+msgid "kg"
+msgstr "кг"
+
+msgid "M"
+msgstr "млн."
+
+msgid "Язык"
+msgstr "Language"

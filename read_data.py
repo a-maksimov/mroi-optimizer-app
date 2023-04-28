@@ -1,42 +1,24 @@
 import pandas as pd
 
-# user inputs
-languages = ['en', 'ru']
-language = languages[1]
-
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
-
-numeric_variables = {'Contribution': 'Вклад',
-                     'Spend': 'Расход',
-                     'Revenue_Calculated': 'Рассчитанный доход',
-                     'Marginal_Contribution': 'Предельный вклад'
-                     }
-
-periodicity_dict = {
-    'Weekly': 'Неделя',
-    'Monthly': 'Месяц',
-    'Yearly': 'Год'
-}
+numeric_variables = ['Contribution', 'Spend', 'Revenue_Calculated', 'Marginal_Contribution']
+periodicity_list = ['Weekly', 'Monthly', 'Yearly']
 
 
 def read_data():
     cp_spend = pd.read_csv('data/mmm_hierarchy.csv')
-
     cp_spend = cp_spend[cp_spend['Power'] > 0].copy()  # remove unspecified variables
-
     cp_spend['Contribution'] = cp_spend['Contribution'] * 1000  # original numbers are in thousands KG
-
     cp_spend['Revenue_Calculated'] = cp_spend['Contribution'] * cp_spend['Multiplier']  # calculate revenue
-
     cp_spend['Marginal_Contribution'] = cp_spend['Contribution'] * cp_spend['Power']  # calculate differential
-
-    cp_spend = cp_spend[cp_spend[numeric_variables.keys()].sum(axis=1) != 0]  # remove zero sum rows
+    cp_spend = cp_spend[cp_spend[numeric_variables].sum(axis=1) != 0]  # remove zero sum rows
 
     cp_spend = cp_spend.reset_index(drop=True)
 
     # split weekly data to month and year granularity
     cp_spend['Date'] = pd.to_datetime(cp_spend['Date'])
-    for periodicity in periodicity_dict:
+    for periodicity in periodicity_list:
+        # get frequency by the first letter of periodicity
         cp_spend[periodicity] = cp_spend['Date'].dt.to_period(periodicity[0])
 
     return cp_spend
