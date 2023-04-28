@@ -1,4 +1,5 @@
 import gettext
+import streamlit as st
 
 
 def _(message):
@@ -9,14 +10,13 @@ translation = gettext.translation('messages', localedir='locales', languages=['r
 
 
 # update language
-def set_language(language_code):
+def set_language():
     global translation
-    if language_code == 'ru_RU':
-        translation = gettext.translation('messages', localedir='locales', languages=[language_code])
+    if st.session_state['language'] == 'Русский':
+        translation = gettext.translation('messages', localedir='locales', languages=['ru_RU'])
     else:
         translation = gettext.NullTranslations()
     # reload all translations
     translation.install()
 
-
-
+# messages.po -o messages.mo

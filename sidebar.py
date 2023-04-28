@@ -1,13 +1,13 @@
 import streamlit as st
 from collections import defaultdict
-from translations import _, set_language
-import read_data
 
-languages = {'Русский': 'ru_RU', 'English': 'en_US'}
+import translations
+from translations import _
+import read_data
 
 
 def render_date(dataframe):
-    # Date UI
+    # date UI
     start_date = dataframe['Date'].min()
     end_date = dataframe['Date'].max()
     date_range = st.sidebar.date_input(
@@ -60,12 +60,18 @@ def create_multiselect(label, key, options, default=None, value=False) -> list:
 
 
 def render_sidebar(dataframe):
-    # set up the translation selection
-    language = st.sidebar.selectbox(_('Language'), languages, key='language')
+    """Renders the sidebar and returns a dictionary of user selections """
 
-    # update the translation object based on the selected language
-    if language:
-        set_language(languages[language])
+    # set up the translation selection
+    languages = ['Русский', 'English']
+    if 'language' in st.session_state:
+        if st.session_state['language'] == 'Русский':
+            index = 0
+        else:
+            index = 1
+    else:
+        index = 0
+    st.sidebar.selectbox(_('Language'), languages, index=index, key='language', on_change=translations.set_language)
 
     st.sidebar.header(_('User inputs'))
 
@@ -85,32 +91,34 @@ def render_sidebar(dataframe):
     st.sidebar.button(_('Clear all'), on_click=clear_multi)
 
     # Create filters
-    granularity = create_multiselect(_('Select granularity'), 'granularity', read_data.granularity_levels)
+    granularity_levels = [_(level) for level in read_data.granularity_levels]
 
-    if 'Dealership' in granularity:
-        granularity_list = read_data.get_level_of_granularity(dataframe, 'Dealership')
+    granularity = create_multiselect(_('Select granularity'), 'granularity', granularity_levels)
+
+    if _('Dealership') in granularity:
+        granularity_list = read_data.get_level_of_granularity(dataframe, _('Dealership'))
         dealerships = create_multiselect(_('Select dealerships'), 'dealerships', granularity_list)
-        selection_dict['Dealership'] = dealerships
+        selection_dict[_('Dealership')] = dealerships
 
-    if 'Channel' in granularity:
+    if _('Channel') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
-                                                              'Channel',
+                                                              _('Channel'),
                                                               selection_dict
                                                               )
-        selection_dict['Channel'] = create_multiselect(_('Select channels'), 'channels', granularity_list)
+        selection_dict[_('Channel')] = create_multiselect(_('Select channels'), 'channels', granularity_list)
 
-    if 'Format' in granularity:
+    if _('Format') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
-                                                              'Format',
+                                                              _('Format'),
                                                               selection_dict
                                                               )
-        selection_dict['Format'] = create_multiselect(_('Select_formats'), 'formats', granularity_list)
+        selection_dict[_('Format')] = create_multiselect(_('Select formats'), 'formats', granularity_list)
 
-    if 'Product' in granularity:
+    if _('Product') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
-                                                              'Product',
+                                                              _('Product'),
                                                               selection_dict
                                                               )
-        selection_dict['Product'] = create_multiselect(_('Select products'), 'products', granularity_list)
+        selection_dict[_('Product')] = create_multiselect(_('Select products'), 'products', granularity_list)
 
     return selection_dict

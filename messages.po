@@ -70,7 +70,7 @@ msgid "Select products"
 msgstr "Выберите продукты"
 
 msgid "Total budget"
-msgstr "Затраты на медиа"
+msgstr "Общий бюджет"
 
 msgid "Total contribution"
 msgstr "Общий вклад"
@@ -132,8 +132,8 @@ msgstr "Категория_1"
 msgid "Category_2"
 msgstr "Категория_2"
 
-msgid "Select variables"
-msgstr "Выберите переменные"
+msgid "Select indicators"
+msgstr "Выберите показатели"
 
 msgid "k"
 msgstr "тыс."
@@ -144,5 +144,20 @@ msgstr "кг"
 msgid "M"
 msgstr "млн."
 
-msgid "Язык"
-msgstr "Language"
+msgid "Language"
+msgstr "Язык"
+
+msgid "TV"
+msgstr "ТВ"
+
+msgid "Social"
+msgstr "Социальные сети"
+
+msgid "Traditional"
+msgstr "Традиционный"
+
+msgid "Display"
+msgstr "Дисплей"
+
+msgid "Video"
+msgstr "Видео"

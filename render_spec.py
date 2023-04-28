@@ -1,36 +1,20 @@
 import read_data
 from translations import _
-import sidebar
 
 
-def render_spec(dataframe):
-    # render sidebar and get user selections
-    selection_dict = sidebar.render_sidebar(dataframe)
+def render_spec(dataframe, selection_dict):
+    """ Transforms the dataframe by user selections in the sidebar"""
 
     # get granularity levels and translate
     granularity_levels = [_(level) for level in read_data.granularity_levels]
-
     # get numeric variables and translate
     numeric_variables = [_(variable) for variable in read_data.numeric_variables]
 
+    # translate values for selection
+    dataframe[granularity_levels] = dataframe[granularity_levels].applymap(lambda p: _(p))
+
     # filter dataframe dates
     df_selection = dataframe.query('@selection_dict["Start_date"] <= Date <= @selection_dict["End_date"]')
-
-    # transform df for selection and display
-    # translate columns
-    columns_translate = {'Product': _('Product'),
-                         'Channel': _('Channel'),
-                         'Dealership': _('Dealership'),
-                         'Format': _('Format'),
-                         'Contribution': _('Contribution'),
-                         'Spend': _('Spend'),
-                         'Revenue_Calculated': _('Revenue_Calculated'),
-                         'Marginal_Contribution': _('Marginal_Contribution'),
-                         'Weekly': _('Weekly'),
-                         'Monthly': _('Monthly'),
-                         'Yearly': _('Yearly')
-                         }
-    df_selection = df_selection.rename(columns=columns_translate)
 
     # filter dataframe by selected granularity levels
     for granularity_level in granularity_levels:
