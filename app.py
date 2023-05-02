@@ -1,9 +1,10 @@
 import streamlit as st
 from translations import _
+from options_menu import menu, about, specification, planning
 from read_data import read_data
 from sidebar import render_sidebar
-from render_spec import render_spec
-from options_menu import menu, about, specification
+from calculate_spec import calculate_spec
+from calculate_plan import calculate_plan
 
 st.set_page_config(page_title='MROI Optimizer App',
                    page_icon=':chart_with_upwards_trend:',
@@ -28,9 +29,9 @@ selected = menu.menu()
 if selected == _('About'):
     about.about_page()
 if selected == _('Specification'):
-    specification.spec_page(render_spec(df, selection_dict))
+    specification.spec_page(calculate_spec(df, selection_dict))
 if selected == _('Planning'):
-    st.title(f'{selected}')
+    planning.plan_page(calculate_plan(calculate_spec(df, selection_dict)))
 
 # ---- HIDE STREAMLIT STYLE ----
 hide_st_style = """

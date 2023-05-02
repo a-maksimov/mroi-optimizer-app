@@ -1,8 +1,6 @@
 import streamlit as st
 from collections import defaultdict
-
-import translations
-from translations import _
+from translations import _, set_language
 import read_data
 
 
@@ -21,9 +19,10 @@ def render_date(dataframe):
 
 
 def clear_multi():
-    """ Resets widgets with Session State API """
+    """
+    Resets widgets with Session State API
+    """
     st.session_state['granularity'] = []
-    st.session_state['granularity_checkbox'] = False
     st.session_state['dealerships'] = []
     st.session_state['channels'] = []
     st.session_state['formats'] = []
@@ -31,17 +30,30 @@ def clear_multi():
     return
 
 
-def create_multiselect(label, key, options, default=None, value=False) -> list:
+def create_multiselect(label, key, options) -> list:
     """
     Creates multiselect with the 'Check all' checkbox underneath
     label (string): label of the multiselect and the key of the checkbox
+    key (string): unique key for multiselect element
     options (list): options for the multiselect
-    default (list): default options for the multiselect
-    value (bool): default value of the checkbox
     """
     container = st.sidebar.container()
-    select_all = st.sidebar.checkbox(_('Select all'), value=value, key=key + '_checkbox')
+    # create Select All checkbox
+    if key + '_checkbox' in st.session_state:
+        checkbox_value = st.session_state[key + '_checkbox']
+    else:
+        checkbox_value = False
+    select_all = st.sidebar.checkbox(_('Select all'), value=checkbox_value, key=key + '_checkbox')
 
+    # create multiselect object
+    # if language has changed, keep the values and translate them
+    if key in st.session_state:
+        if st.session_state['language'] == 'English':
+            selected_options = [_(option, get_original=True) for option in st.session_state[key]]
+        else:
+            selected_options = [_(option) for option in st.session_state[key]]
+    else:
+        selected_options = []
     if select_all:
         ms = container.multiselect(
             label,
@@ -53,7 +65,7 @@ def create_multiselect(label, key, options, default=None, value=False) -> list:
         ms = container.multiselect(
             label,
             options=options,
-            default=default,
+            default=selected_options,
             key=key
         )
     return ms
@@ -71,7 +83,7 @@ def render_sidebar(dataframe):
             index = 1
     else:
         index = 0
-    st.sidebar.selectbox(_('Language'), languages, index=index, key='language', on_change=translations.set_language)
+    st.sidebar.selectbox(_('Language'), languages, index=index, key='language', on_change=set_language)
 
     st.sidebar.header(_('User inputs'))
 
@@ -80,6 +92,7 @@ def render_sidebar(dataframe):
     # Create date range input widget
     start_date, end_date = render_date(dataframe)
     selection_dict.update({'Start_date': start_date, 'End_date': end_date})
+
     periodicity = st.sidebar.selectbox(
         _('Select Periodicity'),
         options=[_(periodicity) for periodicity in read_data.periodicity_list],

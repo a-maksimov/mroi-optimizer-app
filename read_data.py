@@ -2,7 +2,7 @@ import pandas as pd
 from translations import _
 
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
-numeric_variables = ['Contribution', 'Spend', 'Revenue_Calculated', 'Marginal_Contribution']
+numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
 periodicity_list = ['Weekly', 'Monthly', 'Yearly']
 
 
@@ -14,8 +14,8 @@ def translate_table(df):
                          'Format': _('Format'),
                          'Contribution': _('Contribution'),
                          'Spend': _('Spend'),
-                         'Revenue_Calculated': _('Revenue_Calculated'),
-                         'Marginal_Contribution': _('Marginal_Contribution'),
+                         'Revenue Calculated': _('Revenue Calculated'),
+                         'Marginal Contribution': _('Marginal Contribution'),
                          'Weekly': _('Weekly'),
                          'Monthly': _('Monthly'),
                          'Yearly': _('Yearly')
@@ -24,14 +24,19 @@ def translate_table(df):
 
 
 def read_data(filename):
-    """ Loads results of MMM modeling and returns the transformed and translated dataframe """
+    """
+    Loads results of MMM modeling and returns the transformed and translated dataframe
+    """
 
     df = pd.read_csv(filename)
 
+    df.rename(columns={'Revenue_Calculated': 'Revenue Calculated',
+                       'Marginal_Contribution': 'Marginal Contribution'})
+
     df = df[df['Power'] > 0].copy()  # remove unspecified variables
     df['Contribution'] = df['Contribution'] * 1000  # original numbers are in thousands KG
-    df['Revenue_Calculated'] = df['Contribution'] * df['Multiplier']  # calculate revenue
-    df['Marginal_Contribution'] = df['Contribution'] * df['Power']  # calculate differential
+    df['Revenue Calculated'] = df['Contribution'] * df['Multiplier']  # calculate revenue
+    df['Marginal Contribution'] = df['Contribution'] * df['Power']  # calculate differential
     df = df[df[numeric_variables].sum(axis=1) != 0]  # remove zero sum rows
 
     df = df.reset_index(drop=True)

@@ -1,10 +1,11 @@
-import read_data
 from translations import _
+import read_data
 
 
-def render_spec(dataframe, selection_dict):
-    """ Transforms the dataframe by user selections in the sidebar"""
-
+def calculate_spec(dataframe, selection_dict):
+    """
+    Transforms the dataframe by user selections in the sidebar
+    """
     # get granularity levels and translate
     granularity_levels = [_(level) for level in read_data.granularity_levels]
     # get numeric variables and translate
@@ -27,7 +28,7 @@ def render_spec(dataframe, selection_dict):
             df_selection = df_selection.groupby([selection_dict['Periodicity'],
                                                  granularity_level])[numeric_variables].sum()
             break
-    # The else block will NOT be executed if the loop is stopped by a break statement.
+    # the else block will NOT be executed if the loop is stopped by a break statement
     else:
         df_selection = df_selection.groupby([selection_dict['Periodicity']] +
                                             granularity_levels)[numeric_variables].sum()

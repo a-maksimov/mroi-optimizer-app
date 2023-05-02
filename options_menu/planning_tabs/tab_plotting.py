@@ -6,7 +6,7 @@ from translations import _
 import read_data
 
 
-def spec_plotting_tab(dataframe):
+def plan_plotting_tab(dataframe):
     # create a list of column names to plot
     columns_to_plot = st.multiselect(_('Select indicators'),
                                      [_(variable) for variable in read_data.numeric_variables])
@@ -15,22 +15,20 @@ def spec_plotting_tab(dataframe):
     fig = sp.make_subplots(specs=[[{'secondary_y': True}]])
     for column in columns_to_plot:
         for granularity in granularity_to_plot:
-            if _('Revenue').lower() in column.lower() or _('Spend').lower() in column.lower():
+            if 'доход' in column.lower() or 'расход' in column.lower():
                 fig.add_trace(go.Scatter(x=dataframe.index,
                                          y=dataframe[dataframe.iloc[:, 0] == granularity][column],
                                          name=column + ', ' + granularity,
                                          yaxis='y1'),
                               secondary_y=False)
-            elif _('Contribution').lower() in column.lower():
+            elif 'вклад' in column.lower():
                 fig.add_trace(go.Scatter(x=dataframe.index,
                                          y=dataframe[dataframe.iloc[:, 0] == granularity][column],
                                          name=column + ', ' + granularity,
                                          yaxis='y2'),
                               secondary_y=True)
-    # rotate x ticks
-    fig.update_xaxes(tickangle=45)
 
-    # set plot title, adjust size and axes labels
+    # Set plot title, adjust size and axes labels
     fig.update_layout(title=f'{", ".join(columns_to_plot)}',
                       yaxis_title=_('Revenue') + '/' + _('Spend') + ', ' + _('€'),
                       yaxis2_title=_('Contribution') + ', ' + _('kg'))

@@ -24,10 +24,10 @@ msgstr "Расход"
 msgid "Revenue"
 msgstr "Доход"
 
-msgid "Revenue_Calculated"
+msgid "Revenue Calculated"
 msgstr "Рассчитанный доход"
 
-msgid "Marginal_Contribution"
+msgid "Marginal Contribution"
 msgstr "Предельный вклад"
 
 msgid "Weekly"
@@ -161,3 +161,18 @@ msgstr "Дисплей"
 
 msgid "Video"
 msgstr "Видео"
+
+msgid "Enter planned budget"
+msgstr "Введите планируемый бюджет"
+
+msgid "Simulated Spend"
+msgstr "Смоделированный расход"
+
+msgid "Simulated Budget"
+msgstr "Моделируемый бюджет"
+
+msgid "Simulated Contribution"
+msgstr "Смоделированный вклад"
+
+msgid "Simulated Revenue"
+msgstr "Смоделированный доход"

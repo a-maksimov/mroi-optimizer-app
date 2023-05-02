@@ -1,9 +1,8 @@
 import streamlit as st
 from translations import _
-import read_data
 
 
-def spec_table_tab(dataframe):
+def plan_table_tab(dataframe):
     # format date strings and translate
     if dataframe.index.name == _('Weekly'):
         dataframe.index = dataframe.index.strftime('%d-%m-%Y')
@@ -12,16 +11,11 @@ def spec_table_tab(dataframe):
     else:
         dataframe.index = dataframe.index.strftime('%Y')
 
-    # round numeric variables
-    numeric_variables = [_(variable) for variable in read_data.numeric_variables]
-    dataframe[numeric_variables] = dataframe[numeric_variables].round(0)
-
     # add dimensions to the numeric columns names
     column_dimensions = {
-        _('Contribution'): f'{_("Contribution")}, {_("kg")}',
-        _('Spend'): f'{_("Spend")}, €',
-        _('Revenue Calculated'): f'{_("Revenue Calculated")}, €',
-        _('Marginal Contribution'): f'{_("Marginal Contribution")}, {_("kg")}',
+        _('Simulated Spend'): f'{_("Simulated Spend")}, €',
+        _('Simulated Contribution'): f'{_("Simulated Contribution")}, {_("kg")}',
+        _('Simulated Revenue'): f'{_("Simulated Revenue")}, €'
     }
     dataframe = dataframe.rename(columns=column_dimensions)
 
