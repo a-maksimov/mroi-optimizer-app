@@ -1,4 +1,5 @@
 import streamlit as st
+from streamlit.errors import StreamlitAPIException
 from collections import defaultdict
 from translations import _, set_language
 import read_data
@@ -54,36 +55,35 @@ def create_multiselect(label, key, options) -> list:
             selected_options = [_(option) for option in st.session_state[key]]
     else:
         selected_options = []
-    if select_all:
-        ms = container.multiselect(
-            label,
-            options=options,
-            default=options,
-            key=key
-        )
-    else:
-        ms = container.multiselect(
-            label,
-            options=options,
-            default=selected_options,
-            key=key
-        )
-    return ms
+    try:
+        if select_all:
+            ms = container.multiselect(
+                label,
+                options=options,
+                default=options,
+                key=key
+            )
+        else:
+            ms = container.multiselect(
+                label,
+                options=options,
+                default=selected_options,
+                key=key
+            )
+        return ms
+    except StreamlitAPIException:
+        return st.sidebar.write(_('This specification is impossible. Pick a new one.'))
 
 
 def render_sidebar(dataframe):
     """Renders the sidebar and returns a dictionary of user selections """
-
+    languages = {'Русский': 0, 'English': 1}
     # set up the translation selection
-    languages = ['Русский', 'English']
     if 'language' in st.session_state:
-        if st.session_state['language'] == 'Русский':
-            index = 0
-        else:
-            index = 1
+        index = languages[st.session_state['language']]
     else:
-        index = 0
-    st.sidebar.selectbox(_('Language'), languages, index=index, key='language', on_change=set_language)
+        index = languages['Русский']
+    st.sidebar.selectbox(_('Language'), index=index, options=languages, key='language', on_change=set_language)
 
     st.sidebar.header(_('User inputs'))
 
@@ -103,7 +103,7 @@ def render_sidebar(dataframe):
     # Create button to clear the multiselect widgets
     st.sidebar.button(_('Clear all'), on_click=clear_multi)
 
-    # Create filters
+    # create filters
     granularity_levels = [_(level) for level in read_data.granularity_levels]
 
     granularity = create_multiselect(_('Select granularity'), 'granularity', granularity_levels)

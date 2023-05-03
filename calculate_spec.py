@@ -11,9 +11,6 @@ def calculate_spec(dataframe, selection_dict):
     # get numeric variables and translate
     numeric_variables = [_(variable) for variable in read_data.numeric_variables]
 
-    # translate values for selection
-    dataframe[granularity_levels] = dataframe[granularity_levels].applymap(lambda p: _(p))
-
     # filter dataframe dates
     df_selection = dataframe.query('@selection_dict["Start_date"] <= Date <= @selection_dict["End_date"]')
 

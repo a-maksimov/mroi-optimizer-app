@@ -1,5 +1,7 @@
-import gettext
 import streamlit as st
+import gettext
+
+languages = {'Русский': 'ru_RU'}
 
 reverse_dict = {}
 
@@ -16,17 +18,18 @@ def _(message, get_original=False):
     return translated_message
 
 
-translation = gettext.translation('messages', localedir='locales', languages=['ru_RU'])
+translation = gettext.translation('messages', localedir='locales', languages=[languages['Русский']])
 
 
 # update language
 def set_language():
     global translation
     if st.session_state['language'] == 'Русский':
-        translation = gettext.translation('messages', localedir='locales', languages=['ru_RU'])
+        translation = gettext.translation('messages', localedir='locales', languages=[languages['Русский']])
     else:
         translation = gettext.NullTranslations()
     # reload all translations
     translation.install()
+
 
 # messages.po -o messages.mo

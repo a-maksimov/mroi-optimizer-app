@@ -16,12 +16,13 @@ def spec_table_tab(dataframe):
     numeric_variables = [_(variable) for variable in read_data.numeric_variables]
     dataframe[numeric_variables] = dataframe[numeric_variables].round(0)
 
+    dataframe = dataframe.drop([_('Marginal Contribution')], axis='columns')
+
     # add dimensions to the numeric columns names
     column_dimensions = {
         _('Contribution'): f'{_("Contribution")}, {_("kg")}',
         _('Spend'): f'{_("Spend")}, €',
         _('Revenue Calculated'): f'{_("Revenue Calculated")}, €',
-        _('Marginal Contribution'): f'{_("Marginal Contribution")}, {_("kg")}',
     }
     dataframe = dataframe.rename(columns=column_dimensions)
 

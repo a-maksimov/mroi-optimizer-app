@@ -11,6 +11,8 @@ def plan_table_tab(dataframe):
     else:
         dataframe.index = dataframe.index.strftime('%Y')
 
+    dataframe = dataframe.drop([_('Marginal Contribution')], axis='columns')
+
     # add dimensions to the numeric columns names
     column_dimensions = {
         _('Simulated Spend'): f'{_("Simulated Spend")}, €',

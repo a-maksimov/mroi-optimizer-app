@@ -8,9 +8,12 @@ import read_data
 
 def spec_plotting_tab(dataframe):
     # create a list of column names to plot
-    columns_to_plot = st.multiselect(_('Select indicators'),
-                                     [_(variable) for variable in read_data.numeric_variables])
-    granularity_to_plot = st.multiselect(_('Select granularity'), list(pd.unique(dataframe.iloc[:, 0])))
+    col_1, col_2 = st.columns(2)
+    with col_1:
+        numeric_variables = [_(variable) for variable in read_data.numeric_variables if _(variable) in dataframe.columns]
+        columns_to_plot = st.multiselect(_('Select indicators'), numeric_variables)
+    with col_2:
+        granularity_to_plot = st.multiselect(_('Select granularity'), list(pd.unique(dataframe.iloc[:, 0])))
 
     fig = sp.make_subplots(specs=[[{'secondary_y': True}]])
     for column in columns_to_plot:

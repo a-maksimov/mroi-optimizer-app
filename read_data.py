@@ -4,10 +4,14 @@ from translations import _
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
 periodicity_list = ['Weekly', 'Monthly', 'Yearly']
+target_products = ['Brand', 'Product_1', 'Product_2', 'Product_3', 'Product_4', 'Product_5', 'Category_1']
 
 
 def translate_table(df):
-    # translate df for selection and display
+    # translate df for filtering and display
+    df[granularity_levels] = df[granularity_levels].applymap(lambda value: _(value))
+
+    # translate columns for filtering and display
     columns_translate = {'Product': _('Product'),
                          'Channel': _('Channel'),
                          'Dealership': _('Dealership'),
@@ -30,13 +34,13 @@ def read_data(filename):
 
     df = pd.read_csv(filename)
 
-    df.rename(columns={'Revenue_Calculated': 'Revenue Calculated',
-                       'Marginal_Contribution': 'Marginal Contribution'})
+    # keep only products related to target variable
+    df = df[df['Product'].isin(target_products)]
 
     df = df[df['Power'] > 0].copy()  # remove unspecified variables
-    df['Contribution'] = df['Contribution'] * 1000  # original numbers are in thousands KG
+    df['Contribution'] = df['Contribution'] * 1000  # original numbers are in thousands kgs
     df['Revenue Calculated'] = df['Contribution'] * df['Multiplier']  # calculate revenue
-    df['Marginal Contribution'] = df['Contribution'] * df['Power']  # calculate differential
+    df['Marginal Contribution'] = df['Contribution'] * df['Power']
     df = df[df[numeric_variables].sum(axis=1) != 0]  # remove zero sum rows
 
     df = df.reset_index(drop=True)

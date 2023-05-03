@@ -176,3 +176,6 @@ msgstr "Смоделированный вклад"
 
 msgid "Simulated Revenue"
 msgstr "Смоделированный доход"
+
+msgid "This specification is impossible. Pick a new one."
+msgstr "Эта спецификация невозможна. Выберите спецификацию заново."
