@@ -37,4 +37,4 @@ def calculate_plan(df):
     df_plan[_('Simulated Contribution')] = df_plan['Coefficient'] * (df_plan[_('Simulated Spend')] ** df_plan['Power'])
     df_plan[_('Simulated Revenue')] = df_plan['Multiplier'] * df_plan[_('Simulated Contribution')]
 
-    return planned_budget, df_plan.drop(['Power', 'Coefficient', 'Proportion', 'Multiplier'], axis='columns')
+    return planned_budget, df_plan

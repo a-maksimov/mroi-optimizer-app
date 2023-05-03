@@ -132,6 +132,9 @@ msgstr "Категория_1"
 msgid "Category_2"
 msgstr "Категория_2"
 
+msgid "Category_3"
+msgstr "Категория_3"
+
 msgid "Select indicators"
 msgstr "Выберите показатели"
 

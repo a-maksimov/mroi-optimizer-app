@@ -4,7 +4,15 @@ from translations import _
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
 periodicity_list = ['Weekly', 'Monthly', 'Yearly']
-target_products = ['Brand', 'Product_1', 'Product_2', 'Product_3', 'Product_4', 'Product_5', 'Category_1']
+target_products = ['Brand',
+                   'Product_1',
+                   'Product_2',
+                   'Product_3',
+                   'Product_4',
+                   'Product_5',
+                   'Category_1',
+                   'Category_2',
+                   'Category_3']
 
 
 def translate_table(df):

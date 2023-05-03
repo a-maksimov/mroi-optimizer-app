@@ -47,4 +47,4 @@ def plan_page(plan):
 
     # define the content of the second tab: Plotting
     with tabs[1]:
-        tab_plotting.plan_plotting_tab(df_plan)
+        pass

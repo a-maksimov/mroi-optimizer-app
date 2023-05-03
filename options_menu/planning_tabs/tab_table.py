@@ -3,6 +3,9 @@ from translations import _
 
 
 def plan_table_tab(dataframe):
+    # drop columns unnecessary for display
+    dataframe = dataframe.drop(['Power', 'Coefficient', 'Proportion', 'Multiplier'], axis='columns')
+
     # format date strings and translate
     if dataframe.index.name == _('Weekly'):
         dataframe.index = dataframe.index.strftime('%d-%m-%Y')
@@ -33,3 +36,4 @@ def plan_table_tab(dataframe):
         'text/csv',
         key='download-csv'
     )
+
