@@ -3,6 +3,35 @@ from streamlit.errors import StreamlitAPIException
 from collections import defaultdict
 from translations import _, set_language
 import read_data
+from options_menu.specification import top_metrics
+from calculate_spec import calculate_spec
+
+
+def update_plan():
+    """
+    This function updates the value of the planned budget in case multiselect widgets in the sidebar change
+    """
+    # results of MMM modeling
+    input_file = 'data/mmm_hierarchy.csv'
+
+    # load the transformed and translated dataframe
+    df = read_data.read_data(input_file)
+
+    # get granularity levels
+    granularity_levels = [_(level) for level in read_data.granularity_levels]
+
+    # update selection dict based on values in session state
+    selection_dict = st.session_state['selection_dict']
+    selection_dict.update({level: st.session_state[level] for level in granularity_levels if level in st.session_state})
+
+    # calculate top metrics
+    updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(calculate_spec(df, selection_dict))
+    st.session_state['budget'] = updated_budget
+    st.session_state['contribution'] = updated_contribution
+    st.session_state['revenue'] = updated_revenue
+    st.session_state['mroi'] = updated_mroi
+    if 'display_planned_budget' in st.session_state:
+        st.session_state['display_planned_budget'] = updated_budget
 
 
 def render_date(dataframe):
@@ -46,8 +75,9 @@ def create_multiselect(label, key, options) -> list:
         checkbox_value = False
     select_all = st.sidebar.checkbox(_('Select all'), value=checkbox_value, key=key + '_checkbox')
 
-    # create multiselect object
-    # if language has changed, keep the values and translate them
+    # Create multiselect object. If language has changed, keep the values and translate them. If values of multiselect
+    # changes, which leads to budget change, the function is called to make the value in the Planning page equal to
+    # the updated budget
     if key in st.session_state:
         if st.session_state['language'] == 'English':
             selected_options = [_(option, get_original=True) for option in st.session_state[key]]
@@ -61,14 +91,16 @@ def create_multiselect(label, key, options) -> list:
                 label,
                 options=options,
                 default=options,
-                key=key
+                key=key,
+                on_change=update_plan
             )
         else:
             ms = container.multiselect(
                 label,
                 options=options,
                 default=selected_options,
-                key=key
+                key=key,
+                on_change=update_plan
             )
         return ms
     except StreamlitAPIException:
@@ -83,6 +115,7 @@ def render_sidebar(dataframe):
         index = languages[st.session_state['language']]
     else:
         index = languages['Русский']
+
     st.sidebar.selectbox(_('Language'), index=index, options=languages, key='language', on_change=set_language)
 
     st.sidebar.header(_('User inputs'))
@@ -96,7 +129,8 @@ def render_sidebar(dataframe):
     periodicity = st.sidebar.selectbox(
         _('Select Periodicity'),
         options=[_(periodicity) for periodicity in read_data.periodicity_list],
-        index=0
+        index=0,
+        key='periodicity'
     )
     selection_dict['Periodicity'] = periodicity
 
@@ -106,11 +140,15 @@ def render_sidebar(dataframe):
     # create filters
     granularity_levels = [_(level) for level in read_data.granularity_levels]
 
-    granularity = create_multiselect(_('Select granularity'), 'granularity', granularity_levels)
+    granularity = create_multiselect(label=_('Select granularity'),
+                                     key='granularity',
+                                     options=granularity_levels)
 
     if _('Dealership') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe, _('Dealership'))
-        dealerships = create_multiselect(_('Select dealerships'), 'dealerships', granularity_list)
+        dealerships = create_multiselect(label=_('Select dealerships'),
+                                         key=_('Dealership'),
+                                         options=granularity_list)
         selection_dict[_('Dealership')] = dealerships
 
     if _('Channel') in granularity:
@@ -118,20 +156,28 @@ def render_sidebar(dataframe):
                                                               _('Channel'),
                                                               selection_dict
                                                               )
-        selection_dict[_('Channel')] = create_multiselect(_('Select channels'), 'channels', granularity_list)
+        selection_dict[_('Channel')] = create_multiselect(label=_('Select channels'),
+                                                          key=_('Channel'),
+                                                          options=granularity_list)
 
     if _('Format') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
                                                               _('Format'),
                                                               selection_dict
                                                               )
-        selection_dict[_('Format')] = create_multiselect(_('Select formats'), 'formats', granularity_list)
+        selection_dict[_('Format')] = create_multiselect(label=_('Select formats'),
+                                                         key=_('Format'),
+                                                         options=granularity_list)
 
     if _('Product') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
                                                               _('Product'),
                                                               selection_dict
                                                               )
-        selection_dict[_('Product')] = create_multiselect(_('Select products'), 'products', granularity_list)
+        selection_dict[_('Product')] = create_multiselect(label=_('Select products'),
+                                                          key=_('Products'),
+                                                          options=granularity_list)
 
+    # save selection dict to the session state for future uses
+    st.session_state['selection_dict'] = selection_dict
     return selection_dict

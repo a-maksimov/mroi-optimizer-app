@@ -4,16 +4,22 @@ import utils
 from options_menu.specification_tabs import tab_table, tab_plotting
 
 
-def spec_page(df_display):
-    """
-    Renders the Specification page by user selections in the sidebar
-    returns tuple of top metrics
-    """
+def top_metrics(df_display):
     # top metrics
     total_spend = df_display[_('Spend')].sum()
     total_contribution = df_display[_('Contribution')].sum()
     total_revenue = df_display[_('Revenue Calculated')].sum()
     total_mroi = total_revenue / total_spend
+    return total_spend, total_contribution, total_revenue, total_mroi
+
+
+def spec_page(df_display):
+    """
+    Renders the Specification page by user selections in the sidebar
+    returns tuple of top metrics
+    """
+    # calculate top metrics
+    total_spend, total_contribution, total_revenue, total_mroi = top_metrics(df_display)
 
     # save top metrics for planning calculations
     st.session_state.update({
@@ -34,15 +40,13 @@ def spec_page(df_display):
     with right_column:
         st.metric('MROI', value=f'{round(total_mroi, 2)}')
 
-    st.markdown('''---''')
-
     # create a tab layout
-    tabs = st.tabs([_('Table'), _('Plotting')])
+    tabs = st.tabs([_('Plotting'), _('Table')])
 
-    # define the content of the first tab: Table
+    # define the content of the first tab: Plotting
     with tabs[0]:
-        tab_table.spec_table_tab(df_display)
-
-    # define the content of the second tab: Plotting
-    with tabs[1]:
         tab_plotting.spec_plotting_tab(df_display)
+
+    # define the content of the second tab: Table
+    with tabs[1]:
+        tab_table.spec_table_tab(df_display)

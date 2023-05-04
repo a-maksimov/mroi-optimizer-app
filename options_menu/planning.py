@@ -36,8 +36,6 @@ def plan_page(plan):
                   value=f'{round(simulated_total_mroi, 2)}',
                   delta=utils.display_percent(st.session_state['mroi'], simulated_total_mroi))
 
-    st.markdown('''---''')
-
     # Create a tab layout
     tabs = st.tabs([_('Table'), _('Plotting')])
 
@@ -47,4 +45,5 @@ def plan_page(plan):
 
     # define the content of the second tab: Plotting
     with tabs[1]:
-        pass
+        tab_plotting.plan_plotting_tab(df_plan)
+
