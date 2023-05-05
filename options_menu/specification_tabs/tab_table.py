@@ -30,7 +30,7 @@ def spec_table_tab(dataframe):
     st.dataframe(dataframe, height=600, use_container_width=True)
 
     # create button to export the table
-    csv = dataframe.to_csv(index=False).encode('utf-8')
+    csv = dataframe.to_csv().encode('utf-8')
     st.download_button(
         _('Export table'),
         csv,

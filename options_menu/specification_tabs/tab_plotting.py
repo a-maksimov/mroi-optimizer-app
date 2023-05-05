@@ -1,7 +1,6 @@
 import streamlit as st
 import pandas as pd
 import plotly.graph_objects as go
-import plotly.subplots as sp
 from translations import _
 import read_data
 
@@ -27,7 +26,7 @@ def spec_plotting_tab(dataframe):
             granularity = list(pd.unique(dataframe.iloc[:, 0]))
         else:
             granularity = []
-        granularity_to_plot = st.multiselect(_('Select granularity'), options=granularity, default=granularity)
+        granularity_to_plot = st.multiselect(_('Select variable'), options=granularity, default=granularity)
 
     fig = go.Figure()
     for column in columns_to_plot:

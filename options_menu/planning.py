@@ -1,7 +1,7 @@
 import streamlit as st
 from translations import _
 import utils
-from options_menu.planning_tabs import tab_table, tab_plotting
+from options_menu.planning_tabs import tab_table, tab_plotting, tab_rc
 
 
 def plan_page(plan):
@@ -18,9 +18,13 @@ def plan_page(plan):
 
     left_column, middle_column1, middle_column2, right_column = st.columns(4)
     with left_column:
+        if 'budget' not in st.session_state:  # Planned page was reloaded
+            budget = planned_budget
+        else:
+            budget = st.session_state['budget']
         st.metric(_('Simulated Budget'),
                   value=utils.display_currency(planned_budget),
-                  delta=utils.display_percent(st.session_state['budget'], planned_budget))
+                  delta=utils.display_percent(budget, planned_budget))
         # to preserve value after the page switch
         st.session_state['display_planned_budget'] = planned_budget
     with middle_column1:
@@ -37,7 +41,7 @@ def plan_page(plan):
                   delta=utils.display_percent(st.session_state['mroi'], simulated_total_mroi))
 
     # Create a tab layout
-    tabs = st.tabs([_('Table'), _('Plotting')])
+    tabs = st.tabs([_('Table'), _('Plotting'), _('Response Curves')])
 
     # define the content of the first tab: Table
     with tabs[0]:
@@ -46,4 +50,8 @@ def plan_page(plan):
     # define the content of the second tab: Plotting
     with tabs[1]:
         tab_plotting.plan_plotting_tab(df_plan)
+
+    # define the content of the third tab: Response Curves
+    with tabs[2]:
+        tab_rc.plan_rc_tab(df_plan)
 

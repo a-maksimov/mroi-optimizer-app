@@ -4,15 +4,16 @@ from translations import _
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
 periodicity_list = ['Weekly', 'Monthly', 'Yearly']
-target_products = ['Brand',
-                   'Product_1',
-                   'Product_2',
-                   'Product_3',
-                   'Product_4',
-                   'Product_5',
-                   'Category_1',
-                   'Category_2',
-                   'Category_3']
+target_products = [
+    'Brand',
+    'Product_1',
+    'Product_2',
+    'Product_3',
+    'Product_4',
+    'Product_5',
+    'Category_1',
+    'Category_2'
+]
 
 
 def translate_table(df):
@@ -64,7 +65,9 @@ def read_data(filename):
 
 
 def get_level_of_granularity(dataframe, current_level, prev_levels_dict=None):
-    """ Gets a list of unique values in a current level of granularity of a filtered dataframe """
+    """
+    Gets a list of unique values in a current level of granularity of a filtered dataframe
+    """
     if prev_levels_dict:
         # filter dataframe by selections
         for level in prev_levels_dict:

@@ -4,7 +4,8 @@ from translations import _
 
 def plan_table_tab(dataframe):
     # drop columns unnecessary for display
-    dataframe = dataframe.drop(['Power', 'Coefficient', 'Proportion', 'Multiplier'], axis='columns')
+    dataframe = dataframe.drop(['Power', 'Coefficient', 'Proportion', 'Multiplier', _('Marginal Contribution')],
+                               axis='columns')
 
     # format date strings and translate
     if dataframe.index.name == _('Weekly'):
@@ -13,8 +14,6 @@ def plan_table_tab(dataframe):
         dataframe.index = dataframe.index.strftime('%m-%Y')
     else:
         dataframe.index = dataframe.index.strftime('%Y')
-
-    dataframe = dataframe.drop([_('Marginal Contribution')], axis='columns')
 
     # add dimensions to the numeric columns names
     column_dimensions = {
@@ -28,7 +27,7 @@ def plan_table_tab(dataframe):
     st.dataframe(dataframe, height=600, use_container_width=True)
 
     # create button to export the table
-    csv = dataframe.to_csv(index=False).encode('utf-8')
+    csv = dataframe.to_csv().encode('utf-8')
     st.download_button(
         _('Export table'),
         csv,
@@ -36,4 +35,3 @@ def plan_table_tab(dataframe):
         'text/csv',
         key='download-csv'
     )
-

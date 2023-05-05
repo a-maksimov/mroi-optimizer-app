@@ -3,22 +3,27 @@ import gettext
 
 languages = {'Русский': 'ru_RU'}
 
+translation = gettext.translation('messages', localedir='locales', languages=[languages['Русский']])
+
 reverse_dict = {}
 
 
-# function to translate strings overloaded for backwards translation
+# function to translate strings
 def _(message, get_original=False):
     global reverse_dict
 
+    # reverse translation
     if get_original:
         return reverse_dict.get(message, message)
 
+    # get translated string
     translated_message = translation.gettext(message)
-    reverse_dict[translated_message] = message
+
+    # create dictionary for reverse translation
+    if translated_message not in reverse_dict:
+        reverse_dict[translated_message] = message
+
     return translated_message
-
-
-translation = gettext.translation('messages', localedir='locales', languages=[languages['Русский']])
 
 
 # update language

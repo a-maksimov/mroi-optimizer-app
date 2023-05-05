@@ -9,7 +9,9 @@ from calculate_spec import calculate_spec
 
 def update_plan():
     """
-    This function updates the value of the planned budget in case multiselect widgets in the sidebar change
+    This function updates the value of the planned budget in case multiselect widgets in the sidebar change.
+    The purpose of this function is to "reset" the top metrics on the Optimisation page if sidebar changes.
+    It is called by "on_change" property of multiselect widgets in the sidebar.
     """
     # results of MMM modeling
     input_file = 'data/mmm_hierarchy.csv'
@@ -20,12 +22,25 @@ def update_plan():
     # get granularity levels
     granularity_levels = [_(level) for level in read_data.granularity_levels]
 
-    # update selection dict based on values in session state
+    # dictionary to update selection_dict from st.session_state
+    level_to_key = {
+        _('Dealership'): 'dealership',
+        _('Channel'): 'channel',
+        _('Format'): 'format',
+        _('Product'): 'product'
+    }
+
+    # get the old selection_dict
     selection_dict = st.session_state['selection_dict']
-    selection_dict.update({level: st.session_state[level] for level in granularity_levels if level in st.session_state})
+
+    # update selection_dict based on new selections in the sidebar
+    selection_dict.update({level: st.session_state[level_to_key[level]] for level in granularity_levels
+                           if level_to_key[level] in st.session_state})
 
     # calculate top metrics
     updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(calculate_spec(df, selection_dict))
+
+    # update values in the session_state to display them in the Optimisation page
     st.session_state['budget'] = updated_budget
     st.session_state['contribution'] = updated_contribution
     st.session_state['revenue'] = updated_revenue
@@ -53,14 +68,14 @@ def clear_multi():
     Resets widgets with Session State API
     """
     st.session_state['granularity'] = []
-    st.session_state['dealerships'] = []
-    st.session_state['channels'] = []
-    st.session_state['formats'] = []
-    st.session_state['products'] = []
+    st.session_state['dealership'] = []
+    st.session_state['channel'] = []
+    st.session_state['format'] = []
+    st.session_state['product'] = []
     return
 
 
-def create_multiselect(label, key, options) -> list:
+def create_multiselect(label, key, options):
     """
     Creates multiselect with the 'Check all' checkbox underneath
     label (string): label of the multiselect and the key of the checkbox
@@ -74,7 +89,6 @@ def create_multiselect(label, key, options) -> list:
     else:
         checkbox_value = False
     select_all = st.sidebar.checkbox(_('Select all'), value=checkbox_value, key=key + '_checkbox')
-
     # Create multiselect object. If language has changed, keep the values and translate them. If values of multiselect
     # changes, which leads to budget change, the function is called to make the value in the Planning page equal to
     # the updated budget
@@ -108,7 +122,9 @@ def create_multiselect(label, key, options) -> list:
 
 
 def render_sidebar(dataframe):
-    """Renders the sidebar and returns a dictionary of user selections """
+    """
+    Renders the sidebar and returns a dictionary of user selections
+    """
     languages = {'Русский': 0, 'English': 1}
     # set up the translation selection
     if 'language' in st.session_state:
@@ -139,17 +155,18 @@ def render_sidebar(dataframe):
 
     # create filters
     granularity_levels = [_(level) for level in read_data.granularity_levels]
-
-    granularity = create_multiselect(label=_('Select granularity'),
+    granularity = create_multiselect(label=_('Select granularity level'),
                                      key='granularity',
                                      options=granularity_levels)
 
     if _('Dealership') in granularity:
-        granularity_list = read_data.get_level_of_granularity(dataframe, _('Dealership'))
-        dealerships = create_multiselect(label=_('Select dealerships'),
-                                         key=_('Dealership'),
-                                         options=granularity_list)
-        selection_dict[_('Dealership')] = dealerships
+        granularity_list = read_data.get_level_of_granularity(dataframe,
+                                                              _('Dealership'),
+                                                              selection_dict
+                                                              )
+        selection_dict[_('Dealership')] = create_multiselect(label=_('Select dealerships'),
+                                                             key='dealership',
+                                                             options=granularity_list)
 
     if _('Channel') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,
@@ -157,7 +174,7 @@ def render_sidebar(dataframe):
                                                               selection_dict
                                                               )
         selection_dict[_('Channel')] = create_multiselect(label=_('Select channels'),
-                                                          key=_('Channel'),
+                                                          key='channel',
                                                           options=granularity_list)
 
     if _('Format') in granularity:
@@ -166,7 +183,7 @@ def render_sidebar(dataframe):
                                                               selection_dict
                                                               )
         selection_dict[_('Format')] = create_multiselect(label=_('Select formats'),
-                                                         key=_('Format'),
+                                                         key='format',
                                                          options=granularity_list)
 
     if _('Product') in granularity:
@@ -175,9 +192,10 @@ def render_sidebar(dataframe):
                                                               selection_dict
                                                               )
         selection_dict[_('Product')] = create_multiselect(label=_('Select products'),
-                                                          key=_('Products'),
+                                                          key='product',
                                                           options=granularity_list)
 
     # save selection dict to the session state for future uses
     st.session_state['selection_dict'] = selection_dict
+
     return selection_dict

@@ -54,8 +54,11 @@ msgstr "Пользовательский ввод"
 msgid "Select Periodicity"
 msgstr "Выберите периодичность"
 
-msgid "Select granularity"
-msgstr "Выберите гранулярность"
+msgid "Select granularity level"
+msgstr "Выберите уровень гранулярности"
+
+msgid "Select variable"
+msgstr "Выберите переменную"
 
 msgid "Select dealerships"
 msgstr "Выберите источники данных"
@@ -182,3 +185,6 @@ msgstr "Смоделированный доход"
 
 msgid "This specification is impossible. Pick a new one."
 msgstr "Эта спецификация невозможна. Выберите спецификацию заново."
+
+msgid "Response Curves"
+msgstr "Кривые насыщения"
