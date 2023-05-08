@@ -1,9 +1,8 @@
-import streamlit as st
 from streamlit_option_menu import option_menu
+from translations import _
 
 
-def menu(language_code=None):
-    from translations import _  # import inside the function to avoid circular import
+def menu():
     selected = option_menu(
         menu_title=None,
         options=[_('About'), _('Specification'), _('Planning')],
@@ -11,6 +10,6 @@ def menu(language_code=None):
         menu_icon='cast',
         default_index=1,
         orientation='horizontal',
-        key=language_code  # unique key to avoid DuplicateWidgetID error
+        key='menu'
     )
     return selected
