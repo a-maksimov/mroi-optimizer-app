@@ -24,18 +24,25 @@ def plan_rc_tab(dataframe):
                                              options=granularity,
                                              default=granularity,
                                              key='granularity_to_rc_plot')
-        granularity_level = [_(level) for level in read_data.granularity_levels if _(level) in dataframe.columns]
+        granularity_level = [_(level) for level in read_data.granularity_levels if _(level) in dataframe.columns].pop()
         fig = go.Figure()
         for granularity in granularity_to_plot:
-            df = response_curves_data(dataframe, *granularity_level, granularity)
-            fig.add_trace(go.Scatter(x=df['Spend'], y=df['Revenue'], name=f'{granularity}'))
-
+            curve_data, marker_loc = response_curves_data(dataframe, granularity_level, granularity)
+            fig.add_trace(go.Scatter(x=curve_data['Spend'],
+                                     y=curve_data['Revenue'],
+                                     name=f'{granularity}',
+                                     mode='lines'))
+            fig.add_trace(go.Scatter(x=[curve_data.iloc[marker_loc]['Spend']],
+                                     y=[curve_data.iloc[marker_loc]['Revenue']],
+                                     name=f'{_("Factual Spend")} {_("on")} {granularity}',
+                                     mode='markers',
+                                     marker=dict(size=15)))
     fig.update_layout(
         title=f'{", ".join(granularity_to_plot)}',
         legend=dict(
             orientation='h',
             yanchor='bottom',
-            y=1.02,
+            y=-1.02,
             xanchor='right',
             x=1
         ),
@@ -45,6 +52,7 @@ def plan_rc_tab(dataframe):
             tickprefix='€ ',
             tickformat=',.2f'
         ),
+        hovermode='x unified'
     )
 
     fig.update_xaxes(
