@@ -1,64 +1,72 @@
-# Для чего предназначено это приложение?
+# What is the purpose of this application?
 
-* Оценить, какие маркетинговые медиа-каналы обеспечат наибольший доход при дополнительном финансировании.
+* Evaluate which marketing media channels will provide the highest revenue with additional funding.
+* Understand how to improve business performance with the same level of marketing company funding.
+* Plan a media marketing budget to achieve brand business goals.
 
-* Понять, как улучшить бизнес-показатели при том же уровне финансирования маркетинговых компаний.
+# Terms and Definitions
 
-* Cпланировать бюджет медиа-маркетинга для достижения бизнес-целей бренда.
+* **Marketing Mix Modeling (MMM)** is an analytical tool that allows to assess the contribution of each element of the marketing mix to the total sales volume and determine the optimal budget for marketing campaigns.
 
-# Термины и определения
+* **Return on Marketing Investment (MROI)**, on the other hand, is a metric used to measure the effectiveness of investments in marketing campaigns.
 
-What is Granularity? Granularity represents the overall design of the media activities. It can be
-platforms like Facebook, Instagram, TV, etc. It can be different formats like video, display, etc.
+* **Granularity** in data analysis refers to the level of detail or breakdown of data into smaller parts. This may refer to time intervals, geographic regions, product or service categories, etc.
 
-What is Contribution? Contribution represents the amount of sales volume which is the outcome of media
-activities. Contribution is calculated through marketing mix modeling.
+In the 📈 **MROI Optimizer App**, we use the following granularity levels of marketing campaigns:
 
-What is a Response Curve? Response curves represent the relation between the amount of money spent on a media and
-the contribution attributable to that media. The parameters to build the response curves are calculated through
-marketing mix modeling.
+1. **Dealership** — who provides the data: marketing research agency, social media analytics, etc.
 
-What is "Simulate" or "What-If" scenario? Suppose you have a new media budget for this year. And you want to
-continue the past periods’ media spending pattern. You can do the same by entering the new budget and clicking on
-Simulate.
+2. **Channel**: TV, out of home, social, GoogleAds.
 
-What is Spend Based Optimisation? Simulation may not result in maximum sales volume. Because past budget
-allocation might not be the best one. To get the best allocation for a given budget, select Spend based
-Optimisation.
+3. **Format**: traditional, video, display, etc.
 
-What is Goal Based Optimisation? Suppose, last year the uplift volume was 167 thousands kg. This year,
-you plan to achieve 180 thousands kg. If you use Goal Based Optimisation, you will get the optimal budget
-allocation to achieve that target.
+4. **Product**: specific product advertising campaign, product subcategories or brand.
 
-# Порядок использования приложения
+* **Contribution** is the part of sales volume provided by a particular marketing activity. Contribution is calculated using the MMM.
 
-1. Перейдите в пункт главного меню "Спецификация".
-2. Выберите временной интервал анализа и периодичность.
-3. Выберите уровень грануляризации.
+* **Saturation curves** visualize the relationship between marketing activity expenditures and contribution or revenue from that activity.
+Parameters for building saturation curves were also derived from the MMM results.
 
-Например, для анализа маркетинговых кампаний Бисквитной продукции по ТВ и в социальных сетях
-выберите:
-&nbsp;&nbsp;* Гранулярность: Dealership, Channel, Format, Products;
-&nbsp;&nbsp;* Источник данных: OMD, Instagram, Facebook;
-&nbsp;&nbsp;* Канал: Social, TV;
-&nbsp;&nbsp;* Форматы: Traditional, Video;
-&nbsp;&nbsp;* Продукты: Бренд, Бисквиты, Продукт_1, Продукт_2, Продукт_4, Продукт_5, Категория_2.
+# Application Sections
 
-4. Оцените общие расходы на медиа-маркетинг, общий вклад в продажи, рассчитанный общий доход и показатель MROI
-для установленного уровня грануляризации.
+## Specification
+In the **"Specification"** section, you can view the results of MMM modeling in graphical and tabular representations and set the granularity level for planning.
 
-5. Click on MEDIA PLANNING button to move to the planning tab.
-6. Add a budget and click SIMULATE to get budget allocation based on past.
-7. Click on SPEND BASED OPTIMISATION button to get the optimised budget allocation for the same budget.
-8. To achieve a business performance target, enter the target and click on GOAL BASED OPTIMISATION.
+Above the table are macro indicators for the selected granularity level.
 
-# OUTPUTS
+## Planning
 
-COMPARISON OVER PERIODICITY is a plot to compare the simulated (what-if) and the optimised spending over the
-selected periodicity (weekly, monthly, etc.).
+The **"Planning"** section allows you to plan the budget size and allocation based on historical data and MMM results.
 
-COMPARISON OVER GRANULARITY is a collection of plots comparing simulated (what-if) and the optimised scenarios on
-spending and uplift for different granularity.
+The first scenario is **"What if?"** What if you plan to increase or decrease media marketing investments next year?
+Enter a new budget and track how macro indicators change.
+The modeling takes into account the proportions of budget distribution that were in historical data, as well as the effect of diminishing marginal utility.
 
-SPEND/ GOAL BASED OPTIMISATION is the comparison between the simulated (what-if) and optimised scenarios in a
-tabular format.
+Often existing budget allocation is not optimal.
+To address this problem, two other planning scenarios are proposed: **spend based optimization** and **goal based optimization**.
+The expense optimization scenario allows to maximize the expected return on investment while satisfying budget constraints.
+The goal optimization scenario allows to achieve the desired business goals while minimizing the budget.
+
+# Application usage instructions
+
+1. Go to the **"Specification"** section of the main menu.
+2. Select the time interval for analysis and the frequency.
+3. Choose the level of granularity.
+
+For example, to analyze marketing campaigns for products on TV and social media, select:
+
+&nbsp;&nbsp;* **Granularity**: Channel, Product;
+
+&nbsp;&nbsp;* **Channel**: TV, Social Media;
+
+&nbsp;&nbsp;* **Product**: select all.
+
+4. Evaluate total media marketing expenses, total contribution to sales, calculated total revenue, and MROI.
+
+5. Go to the **"Planning"** section of the main menu.
+
+6. Review the saturation curves.
+
+7. Enter the planned budget and monitor how macro indicators change.
+
+8. Perform expense optimization or goal optimization.
