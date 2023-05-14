@@ -40,7 +40,6 @@ def read_data(filename):
     """
     Loads results of MMM modeling and returns the transformed and translated dataframe
     """
-
     df = pd.read_csv(filename)
 
     # keep only products related to target variable

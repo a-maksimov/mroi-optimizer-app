@@ -1,5 +1,4 @@
 import streamlit as st
-from streamlit.errors import StreamlitAPIException
 from collections import defaultdict
 from translations import _, set_language
 import read_data
@@ -7,12 +6,16 @@ from options_menu.specification import top_metrics
 from calculate_spec import calculate_spec
 
 
-def update_plan():
+def multiselect_callback(key_checkbox):
     """
-    This function updates the value of the planned budget in case multiselect widgets in the sidebar change.
+    Callback function of multiselect widgets in the sidebar.
+
+    This function updates the value of the planned budget on change of sidebar widgets.
     The purpose of this function is to "reset" the top metrics on the Optimisation page if sidebar changes.
-    It is called by "on_change" property of multiselect widgets in the sidebar.
+
+    It also changes the value of corresponding Select All checkbox to False
     """
+    # update plan
     # results of MMM modeling
     input_file = 'data/mmm_hierarchy.csv'
 
@@ -38,7 +41,8 @@ def update_plan():
                            if level_to_key[level] in st.session_state})
 
     # calculate top metrics
-    updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(calculate_spec(df, selection_dict))
+    updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(
+        calculate_spec(df, selection_dict))
 
     # update values in the session_state to display them in the Optimisation page
     st.session_state['budget'] = updated_budget
@@ -47,6 +51,22 @@ def update_plan():
     st.session_state['mroi'] = updated_mroi
     if 'display_planned_budget' in st.session_state:
         st.session_state['display_planned_budget'] = updated_budget
+
+    # uncheck Select All checkbox
+    st.session_state[key_checkbox + '_track'] = False
+
+
+def render_language():
+    # language UI
+    languages = ['Русский', 'English']
+    # set the default value after re-render of widget
+    # 'language_switch_counter' value changes after set_language() callback
+    if 'language_switch_counter' in st.session_state:
+        default = st.session_state['language_switch_counter'] % 2
+    else:
+        default = 0
+    # set up the translation selection
+    return st.sidebar.selectbox(_('Language'), index=default, options=languages, key='language', on_change=set_language)
 
 
 def render_date(dataframe):
@@ -65,14 +85,24 @@ def render_date(dataframe):
 
 def clear_multi():
     """
-    Resets widgets with Session State API
+    Callback function of Clear All button.
+    Resets multiselect widgets and checkboxes
     """
-    st.session_state['granularity'] = []
-    st.session_state['dealership'] = []
-    st.session_state['channel'] = []
-    st.session_state['format'] = []
     st.session_state['product'] = []
-    return
+    st.session_state['product_checkbox_track'] = False
+    st.session_state['format'] = []
+    st.session_state['format_checkbox_track'] = False
+    st.session_state['channel'] = []
+    st.session_state['channel_checkbox_track'] = False
+    st.session_state['dealership'] = []
+    st.session_state['dealership_checkbox_track'] = False
+    st.session_state['granularity'] = []
+    st.session_state['granularity_checkbox_track'] = False
+
+
+def flip_checkbox_track(key_checkbox):
+    """ Callback function that is called on sidebar checkboxes change and tracks its values in between re-rendering """
+    st.session_state[key_checkbox + '_track'] = not st.session_state[key_checkbox + '_track']
 
 
 def create_multiselect(label, key, options):
@@ -83,65 +113,59 @@ def create_multiselect(label, key, options):
     options (list): options for the multiselect
     """
     container = st.sidebar.container()
-    # create Select All checkbox
-    if key + '_checkbox' in st.session_state:
-        checkbox_value = st.session_state[key + '_checkbox']
-    else:
-        checkbox_value = False
-    select_all = st.sidebar.checkbox(_('Select all'), value=checkbox_value, key=key + '_checkbox')
-    # Create multiselect object. If language has changed, keep the values and translate them. If values of multiselect
-    # changes, which leads to budget change, the function is called to make the value in the Planning page equal to
-    # the updated budget
-    if key in st.session_state:
-        if st.session_state['language'] == 'English':
-            selected_options = [_(option, get_original=True) for option in st.session_state[key]]
-        else:
-            selected_options = [_(option) for option in st.session_state[key]]
-    else:
+
+    key_checkbox = key + '_checkbox'
+
+    # check if multiselect was created before
+    if key not in st.session_state:
         selected_options = []
-    try:
-        if select_all:
-            ms = container.multiselect(
-                label,
-                options=options,
-                default=options,
-                key=key,
-                on_change=update_plan
-            )
-        else:
-            ms = container.multiselect(
-                label,
-                options=options,
-                default=selected_options,
-                key=key,
-                on_change=update_plan
-            )
-        return ms
-    except StreamlitAPIException:
-        return st.sidebar.write(_('This specification is impossible. Pick a new one.'))
+    else:
+        selected_options = [_(option) for option in st.session_state[key]]
+
+    # create Select All checkbox and maintain value after sidebar re-render (e.g. after language switch)
+    # check if checkbox was created before
+    if key_checkbox not in st.session_state:
+        # initiate checkbox value tracking
+        st.session_state[key_checkbox + '_track'] = False
+
+    # create checkbox
+    st.sidebar.checkbox(_('Select all'),
+                        value=st.session_state[key_checkbox + '_track'],
+                        key=key_checkbox,
+                        on_change=flip_checkbox_track,
+                        args=(key_checkbox,))
+
+    # create multiselect object
+    if st.session_state[key_checkbox + '_track']:
+        default = options
+    else:
+        default = selected_options
+
+    # if key in st.session_state:
+    #     st.session_state[key].empty()
+
+    return container.multiselect(label,
+                                 options=options,
+                                 default=default,
+                                 key=key,
+                                 on_change=multiselect_callback,
+                                 args=(key_checkbox,))
 
 
 def render_sidebar(dataframe):
-    """
-    Renders the sidebar and returns a dictionary of user selections
-    """
-    languages = {'Русский': 0, 'English': 1}
-    # set up the translation selection
-    if 'language' in st.session_state:
-        index = languages[st.session_state['language']]
-    else:
-        index = languages['Русский']
-
-    st.sidebar.selectbox(_('Language'), index=index, options=languages, key='language', on_change=set_language)
+    """ Renders the sidebar and returns a dictionary of user selections """
+    # render language selection widget
+    render_language()
 
     st.sidebar.header(_('User inputs'))
 
     selection_dict = defaultdict(list)
 
-    # Create date range input widget
+    # create date range input widget
     start_date, end_date = render_date(dataframe)
     selection_dict.update({'Start_date': start_date, 'End_date': end_date})
 
+    # create periodicity selection widget
     periodicity = st.sidebar.selectbox(
         _('Select Periodicity'),
         options=[_(periodicity) for periodicity in read_data.periodicity_list],
@@ -150,14 +174,15 @@ def render_sidebar(dataframe):
     )
     selection_dict['Periodicity'] = periodicity
 
-    # Create button to clear the multiselect widgets
+    # create button to clear the multiselect widgets
     st.sidebar.button(_('Clear all'), on_click=clear_multi)
 
-    # create filters
+    # create multiselect filters widgets
     granularity_levels = [_(level) for level in read_data.granularity_levels]
     granularity = create_multiselect(label=_('Select granularity level'),
                                      key='granularity',
                                      options=granularity_levels)
+    selection_dict['granularity'] = granularity
 
     if _('Dealership') in granularity:
         granularity_list = read_data.get_level_of_granularity(dataframe,

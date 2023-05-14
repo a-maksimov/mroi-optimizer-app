@@ -24,6 +24,7 @@ def plan_rc_tab(dataframe):
                                              options=granularity,
                                              default=granularity,
                                              key='granularity_to_rc_plot')
+        # get the lowest granularity level from the selected
         granularity_level = [_(level) for level in read_data.granularity_levels if _(level) in dataframe.columns].pop()
         fig = go.Figure()
         for granularity in granularity_to_plot:
