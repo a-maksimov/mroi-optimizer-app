@@ -9,8 +9,8 @@ def menu():
     menu_placeholder = st.empty()
     options = [_('About'), _('Specification'), _('Planning'), _('Optimization')]
     # initialize menu tracker
-    if 'menu_tracker' not in st.session_state:
-        st.session_state['menu_tracker'] = 1
+    if 'menu_track' not in st.session_state:
+        st.session_state['menu_track'] = 1
     # delete options menu because it glitches
     else:
         menu_placeholder.empty()
@@ -21,8 +21,8 @@ def menu():
             options=options,
             icons=['question-circle', 'bar-chart-fill', 'graph-up', 'sliders'],
             menu_icon='cast',
-            default_index=st.session_state['menu_tracker'],
+            default_index=st.session_state['menu_track'],
             orientation='horizontal',
         )
-    st.session_state['menu_tracker'] = options.index(selected)
+    st.session_state['menu_track'] = options.index(selected)
     return selected

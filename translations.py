@@ -29,7 +29,7 @@ def _(message, get_original=False):
 def translate_nest(value, get_original=False):
     """ Recursively apply a translation function to all values in the nested collection """
     if isinstance(value, dict):
-        return {translate_nest(k, get_original=get_original): translate_nest(v, get_original=get_original)
+        return {k: translate_nest(v, get_original=get_original)
                 for k, v in value.items()}
     elif isinstance(value, list):
         return [translate_nest(elem, get_original=get_original) for elem in value]

@@ -9,7 +9,7 @@ def spec_page(df_display):
     Renders the Specification page by user selections in the sidebar
     returns tuple of top metrics
     """
-    # we access top metrics calculated and saved in the session state
+    # we access top metrics calculated and save in the session state
     # by top_metrics() function call inside calculate_spec
     total_spend = st.session_state['budget']
     total_contribution = st.session_state['contribution']

@@ -16,7 +16,7 @@ def multiselect_callback(key):
     It also changes the value of corresponding Select All checkbox to False
     """
     # do if Planning page is selected
-    if st.session_state['menu_tracker'] == 2:
+    if st.session_state['menu_track'] == 2:
         # dictionary for updating selection_dict in st.session state
         level_to_key = {
             _('Dealership'): 'dealership',
@@ -42,7 +42,8 @@ def multiselect_callback(key):
                                if level_to_key[level] in st.session_state})
 
         # calculate top metrics
-        updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(calculate_spec(df, selection_dict))
+        updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(
+            calculate_spec(df, selection_dict))
 
         # update values in the session_state to display them in the Optimisation page
         st.session_state['budget'] = updated_budget
@@ -55,7 +56,7 @@ def multiselect_callback(key):
     # uncheck Select All checkbox
     st.session_state[key + '_checkbox' + '_track'] = False
 
-    # track selected options
+    # update multiselect traker
     st.session_state[key + '_track'] = st.session_state[key]
 
 
@@ -106,22 +107,16 @@ def flip_checkbox_track(key, options):
     # if Select All is checked
     if st.session_state[key_checkbox_track]:
         key_track = key + '_track'
-        # update multiselect selected options to all
         st.session_state[key_track] = options
 
 
 def create_checkbox(key, options):
     """ Create Select All checkbox """
-    # initiate checkbox value tracking
+    # initialize checkbox value tracking
     key_checkbox = key + '_checkbox'
     key_checkbox_track = key_checkbox + '_track'
     if key_checkbox_track not in st.session_state:
         st.session_state[key_checkbox_track] = False
-
-    if key_checkbox in st.session_state:
-        if st.session_state[key_checkbox] != st.session_state[key_checkbox_track]:
-            # delete the old checkbox before creating a new one, because it's value glitches inbetween re-rendering
-            del st.session_state[key_checkbox]
 
     # create Select All checkbox
     st.sidebar.checkbox(_('Select all'),
@@ -144,26 +139,21 @@ def create_multiselect(label, key, options):
     # create Select All checkbox widget
     create_checkbox(key, options)
 
-    # initiate multiselect selected options tracking
+    # initialize multiselect selected options tracking
     key_track = key + '_track'
     if key_track not in st.session_state:
         st.session_state[key_track] = []
 
-    # if Select all is checked, use all options
-    if st.session_state[key + '_checkbox_track']:
-        default = options
-    else:
-        default = st.session_state[key_track]
-
     with container:
-        # create multiselect widget
         ms = st.multiselect(label,
                             options=options,
-                            default=default,
+                            default=st.session_state[key_track],
                             key=key,
                             on_change=multiselect_callback,
                             args=(key,))
 
+    if st.session_state[key_track] != ms:
+        st.session_state[key_track] = ms
     return ms
 
 
