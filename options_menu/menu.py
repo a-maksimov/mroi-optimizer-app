@@ -5,7 +5,7 @@ from translations import _
 
 def menu():
     """ Creates horizontal options menu and manually adds the key 'menu_tracker' to st.sessions_state. """
-    options = [_('About'), _('Specification'), _('Planning'), _('Allocation')]
+    options = [_('About'), _('Specification'), _('Planning'), _('Optimization')]
     if 'menu_tracker' not in st.session_state:
         st.session_state['menu_tracker'] = 1
 
@@ -14,7 +14,7 @@ def menu():
         options=options,
         icons=['question-circle', 'bar-chart-fill', 'graph-up', 'sliders'],
         menu_icon='cast',
-        default_index=st.session_state['menu_tracker'],
+        default_index=1,
         orientation='horizontal',
     )
     st.session_state['menu_tracker'] = options.index(selected)
