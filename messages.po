@@ -99,6 +99,9 @@ msgstr "Спецификация"
 msgid "Planning"
 msgstr "Планирование"
 
+msgid "Allocation"
+msgstr "Аллокация"
+
 msgid "Brand"
 msgstr "Бренд"
 

@@ -56,11 +56,14 @@ The **goal based optimization** scenario allows to achieve the desired business 
 
 For example, to analyze marketing campaigns for products on TV and social media, select:
 
-&nbsp;&nbsp;* **Granularity**: Channel, Product;
+* **Granularity**: Channel, Product;
 
-&nbsp;&nbsp;* **Channel**: TV, Social Media;
+* **Channel**: TV, Social Media;
 
-&nbsp;&nbsp;* **Product**: select all.
+* **Product**: select all.
+
+**Hint:** Levels of granularity are not only a hierarchical structure, but also filters.
+If some elements at a lower level of granularity are missing at a certain level, those elements will be unavailable.
 
 4. Evaluate total media marketing expenses, total contribution to sales, calculated total revenue, and MROI.
 
