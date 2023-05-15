@@ -27,9 +27,7 @@ def _(message, get_original=False):
 
 
 def translate_nest(value, get_original=False):
-    """
-    Recursively apply a function to all values in the nested collection
-    """
+    """ Recursively apply a translation function to all values in the nested collection """
     if isinstance(value, dict):
         return {translate_nest(k, get_original=get_original): translate_nest(v, get_original=get_original)
                 for k, v in value.items()}
@@ -56,4 +54,4 @@ def set_language():
     # reload all translations
     translation.install()
 
-# messages.po -o messages.mo
+# msgfmt messages.po -o messages.mo

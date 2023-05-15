@@ -4,12 +4,32 @@ import utils
 from options_menu.planning_tabs import tab_table, tab_plotting, tab_rc
 
 
-def plan_page(plan):
+def handle_plan_input():
+    """ Callback for planned budget input text widget """
+    # update display_planned_budget in the session state with the new value from the input text
+    # display_planned_budget is initialized in calculate_plan
+    if 'display_planned_budget' in st.session_state:
+        st.session_state['display_planned_budget'] = float(st.session_state['planned_budget'])
+
+
+def plan_input():
+    """ Input for planned budget """
+    # 'display_planned_budget' is in the session state after calculate_plan
+    input_planned_budget = st.text_input(f'{_("Enter planned budget") + ", €"}',
+                                         value=st.session_state['display_planned_budget'],
+                                         key='planned_budget',
+                                         on_change=handle_plan_input)
+    return float(input_planned_budget)
+
+
+def plan_page(df_plan):
     """
     Renders the Planning page based on the Specification page
     plan (tuple): a tuple of a planned budget and transformed dataframe
     """
-    planned_budget, df_plan = plan
+    input_col, *padding = st.columns(4)
+    with input_col:
+        planned_budget = plan_input()
 
     # top metrics
     simulated_total_contribution = df_plan[_('Simulated Contribution')].sum()
@@ -18,7 +38,8 @@ def plan_page(plan):
 
     left_column, middle_column1, middle_column2, right_column = st.columns(4)
     with left_column:
-        if 'budget' not in st.session_state:  # Planned page was reloaded
+        # if Planning page was reloaded
+        if 'budget' not in st.session_state:
             budget = planned_budget
         else:
             budget = st.session_state['budget']
@@ -26,7 +47,6 @@ def plan_page(plan):
                   value=utils.display_currency(planned_budget),
                   delta=utils.display_percent(budget, planned_budget))
         # to preserve value after the page switch
-        st.session_state['display_planned_budget'] = planned_budget
     with middle_column1:
         st.metric(_('Simulated Contribution'),
                   value=utils.display_volume(simulated_total_contribution),
@@ -54,4 +74,3 @@ def plan_page(plan):
     # define the content of the third tab: Response Curves
     with tabs[2]:
         tab_rc.plan_rc_tab(df_plan)
-

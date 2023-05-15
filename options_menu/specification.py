@@ -4,30 +4,17 @@ import utils
 from options_menu.specification_tabs import tab_table, tab_plotting
 
 
-def top_metrics(df_display):
-    # top metrics
-    total_spend = df_display[_('Spend')].sum()
-    total_contribution = df_display[_('Contribution')].sum()
-    total_revenue = df_display[_('Revenue Calculated')].sum()
-    total_mroi = total_revenue / total_spend
-    return total_spend, total_contribution, total_revenue, total_mroi
-
-
 def spec_page(df_display):
     """
     Renders the Specification page by user selections in the sidebar
     returns tuple of top metrics
     """
-    # calculate top metrics
-    total_spend, total_contribution, total_revenue, total_mroi = top_metrics(df_display)
-
-    # save top metrics for planning calculations
-    st.session_state.update({
-        'budget': total_spend,
-        'contribution': total_contribution,
-        'revenue': total_revenue,
-        'mroi': total_mroi
-    })
+    # we access top metrics calculated and saved in the session state
+    # by top_metrics() function call inside calculate_spec
+    total_spend = st.session_state['budget']
+    total_contribution = st.session_state['contribution']
+    total_revenue = st.session_state['revenue']
+    total_mroi = st.session_state['mroi']
 
     # render top metrics
     left_column, middle_column1, middle_column2, right_column = st.columns(4)

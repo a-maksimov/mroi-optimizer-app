@@ -2,11 +2,11 @@ import streamlit as st
 from collections import defaultdict
 from translations import _, set_language
 import read_data
-from options_menu.specification import top_metrics
+from calculate_spec import top_metrics
 from calculate_spec import calculate_spec
 
 
-def multiselect_callback(key_checkbox):
+def multiselect_callback(key):
     """
     Callback function of multiselect widgets in the sidebar.
 
@@ -15,45 +15,48 @@ def multiselect_callback(key_checkbox):
 
     It also changes the value of corresponding Select All checkbox to False
     """
-    # update plan
-    # results of MMM modeling
-    input_file = 'data/mmm_hierarchy.csv'
+    # do if Planning page is selected
+    if st.session_state['menu_tracker'] == 2:
+        # dictionary for updating selection_dict in st.session state
+        level_to_key = {
+            _('Dealership'): 'dealership',
+            _('Channel'): 'channel',
+            _('Format'): 'format',
+            _('Product'): 'product'
+        }
+        # update plan
+        # results of MMM modeling
+        input_file = 'data/mmm_hierarchy.csv'
 
-    # load the transformed and translated dataframe
-    df = read_data.read_data(input_file)
+        # load the transformed and translated dataframe
+        df = read_data.read_data(input_file)
 
-    # get granularity levels
-    granularity_levels = [_(level) for level in read_data.granularity_levels]
+        # get granularity levels
+        granularity_levels = [_(level) for level in read_data.granularity_levels]
 
-    # dictionary to update selection_dict from st.session_state
-    level_to_key = {
-        _('Dealership'): 'dealership',
-        _('Channel'): 'channel',
-        _('Format'): 'format',
-        _('Product'): 'product'
-    }
+        # get the old selection_dict
+        selection_dict = st.session_state['selection_dict']
 
-    # get the old selection_dict
-    selection_dict = st.session_state['selection_dict']
+        # update selection dict based on new selections in the sidebar
+        selection_dict.update({level: st.session_state[level_to_key[level]] for level in granularity_levels
+                               if level_to_key[level] in st.session_state})
 
-    # update selection_dict based on new selections in the sidebar
-    selection_dict.update({level: st.session_state[level_to_key[level]] for level in granularity_levels
-                           if level_to_key[level] in st.session_state})
+        # calculate top metrics
+        updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(calculate_spec(df, selection_dict))
 
-    # calculate top metrics
-    updated_budget, updated_contribution, updated_revenue, updated_mroi = top_metrics(
-        calculate_spec(df, selection_dict))
-
-    # update values in the session_state to display them in the Optimisation page
-    st.session_state['budget'] = updated_budget
-    st.session_state['contribution'] = updated_contribution
-    st.session_state['revenue'] = updated_revenue
-    st.session_state['mroi'] = updated_mroi
-    if 'display_planned_budget' in st.session_state:
-        st.session_state['display_planned_budget'] = updated_budget
+        # update values in the session_state to display them in the Optimisation page
+        st.session_state['budget'] = updated_budget
+        st.session_state['contribution'] = updated_contribution
+        st.session_state['revenue'] = updated_revenue
+        st.session_state['mroi'] = updated_mroi
+        if 'display_planned_budget' in st.session_state:
+            st.session_state['display_planned_budget'] = updated_budget
 
     # uncheck Select All checkbox
-    st.session_state[key_checkbox + '_track'] = False
+    st.session_state[key + '_checkbox' + '_track'] = False
+
+    # track selected options
+    st.session_state[key + '_track'] = st.session_state[key]
 
 
 def render_language():
@@ -84,25 +87,48 @@ def render_date(dataframe):
 
 
 def clear_multi():
-    """
-    Callback function of Clear All button.
-    Resets multiselect widgets and checkboxes
-    """
-    st.session_state['product'] = []
-    st.session_state['product_checkbox_track'] = False
-    st.session_state['format'] = []
-    st.session_state['format_checkbox_track'] = False
-    st.session_state['channel'] = []
-    st.session_state['channel_checkbox_track'] = False
-    st.session_state['dealership'] = []
-    st.session_state['dealership_checkbox_track'] = False
-    st.session_state['granularity'] = []
-    st.session_state['granularity_checkbox_track'] = False
+    """ Callback function of Clear All button. Resets multiselect widgets and checkboxes """
+    keys = ['product', 'format', 'channel', 'dealership', 'granularity']
+    for key in keys:
+        # clear all multiselect widgets
+        st.session_state[key + '_track'] = []
+        # uncheck Select all checkboxes
+        st.session_state[key + '_checkbox_track'] = False
 
 
-def flip_checkbox_track(key_checkbox):
+def flip_checkbox_track(key, options):
     """ Callback function that is called on sidebar checkboxes change and tracks its values in between re-rendering """
-    st.session_state[key_checkbox + '_track'] = not st.session_state[key_checkbox + '_track']
+    key_checkbox_track = key + '_checkbox' + '_track'
+
+    # flip the checkbox tracked value
+    st.session_state[key_checkbox_track] = not st.session_state[key_checkbox_track]
+
+    # if Select All is checked
+    if st.session_state[key_checkbox_track]:
+        key_track = key + '_track'
+        # update multiselect selected options to all
+        st.session_state[key_track] = options
+
+
+def create_checkbox(key, options):
+    """ Create Select All checkbox """
+    # initiate checkbox value tracking
+    key_checkbox = key + '_checkbox'
+    key_checkbox_track = key_checkbox + '_track'
+    if key_checkbox_track not in st.session_state:
+        st.session_state[key_checkbox_track] = False
+
+    if key_checkbox in st.session_state:
+        if st.session_state[key_checkbox] != st.session_state[key_checkbox_track]:
+            # delete the old checkbox before creating a new one, because it's value glitches inbetween re-rendering
+            del st.session_state[key_checkbox]
+
+    # create Select All checkbox
+    st.sidebar.checkbox(_('Select all'),
+                        value=st.session_state[key_checkbox_track],
+                        key=key_checkbox,
+                        on_change=flip_checkbox_track,
+                        args=(key, options))
 
 
 def create_multiselect(label, key, options):
@@ -112,48 +138,38 @@ def create_multiselect(label, key, options):
     key (string): unique key for multiselect element
     options (list): options for the multiselect
     """
+    # create container for multiselect
     container = st.sidebar.container()
 
-    key_checkbox = key + '_checkbox'
+    # create Select All checkbox widget
+    create_checkbox(key, options)
 
-    # check if multiselect was created before
-    if key not in st.session_state:
-        selected_options = []
-    else:
-        selected_options = [_(option) for option in st.session_state[key]]
+    # initiate multiselect selected options tracking
+    key_track = key + '_track'
+    if key_track not in st.session_state:
+        st.session_state[key_track] = []
 
-    # create Select All checkbox and maintain value after sidebar re-render (e.g. after language switch)
-    # check if checkbox was created before
-    if key_checkbox not in st.session_state:
-        # initiate checkbox value tracking
-        st.session_state[key_checkbox + '_track'] = False
-
-    # create checkbox
-    st.sidebar.checkbox(_('Select all'),
-                        value=st.session_state[key_checkbox + '_track'],
-                        key=key_checkbox,
-                        on_change=flip_checkbox_track,
-                        args=(key_checkbox,))
-
-    # create multiselect object
-    if st.session_state[key_checkbox + '_track']:
+    # if Select all is checked, use all options
+    if st.session_state[key + '_checkbox_track']:
         default = options
     else:
-        default = selected_options
+        default = st.session_state[key_track]
 
-    # if key in st.session_state:
-    #     st.session_state[key].empty()
+    with container:
+        # create multiselect widget
+        ms = st.multiselect(label,
+                            options=options,
+                            default=default,
+                            key=key,
+                            on_change=multiselect_callback,
+                            args=(key,))
 
-    return container.multiselect(label,
-                                 options=options,
-                                 default=default,
-                                 key=key,
-                                 on_change=multiselect_callback,
-                                 args=(key_checkbox,))
+    return ms
 
 
 def render_sidebar(dataframe):
     """ Renders the sidebar and returns a dictionary of user selections """
+
     # render language selection widget
     render_language()
 

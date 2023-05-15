@@ -11,7 +11,8 @@ st.set_page_config(page_title='MROI Optimizer App',
                    layout='wide')
 
 st.title(':chart_with_upwards_trend: MROI Optimizer App')
-st.markdown("##")
+
+st.divider()
 
 # results of MMM modeling
 input_file = 'data/mmm_hierarchy.csv'

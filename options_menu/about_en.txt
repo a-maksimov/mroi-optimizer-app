@@ -44,8 +44,9 @@ The modeling takes into account the proportions of budget distribution that were
 
 Often existing budget allocation is not optimal.
 To address this problem, two other planning scenarios are proposed: **spend based optimization** and **goal based optimization**.
-The expense optimization scenario allows to maximize the expected return on investment while satisfying budget constraints.
-The goal optimization scenario allows to achieve the desired business goals while minimizing the budget.
+
+The spend **based optimization** scenario allows to maximize the expected return on investment while satisfying budget constraints.
+The **goal based optimization** scenario allows to achieve the desired business goals while minimizing the budget.
 
 # Application usage instructions
 
@@ -69,4 +70,4 @@ For example, to analyze marketing campaigns for products on TV and social media,
 
 7. Enter the planned budget and monitor how macro indicators change.
 
-8. Perform expense optimization or goal optimization.
+8. Perform spend based optimization or goal based optimization.

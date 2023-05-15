@@ -1,5 +1,4 @@
 import os
-from translations import translation
 import streamlit as st
 
 

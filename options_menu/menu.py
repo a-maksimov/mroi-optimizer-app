@@ -5,21 +5,20 @@ from translations import _
 
 def menu():
     """
-    Creates horizontal options menu and manually adds the key 'menu' to to st.sessions_state.
+    Creates horizontal options menu and manually adds the key 'menu' to st.sessions_state.
     :return: selected option
     """
     options = [_('About'), _('Specification'), _('Planning')]
-    if 'menu' in st.session_state:
-        default = options.index(_(st.session_state['menu']))
-    else:
-        default = 1
+    if 'menu_tracker' not in st.session_state:
+        st.session_state['menu_tracker'] = 1
+
     selected = option_menu(
         menu_title=None,
         options=options,
         icons=['house', 'bar-chart-fill', 'graph-up'],
         menu_icon='cast',
-        default_index=default,
-        orientation='horizontal'
+        default_index=st.session_state['menu_tracker'],
+        orientation='horizontal',
     )
-    st.session_state['menu'] = selected
+    st.session_state['menu_tracker'] = options.index(selected)
     return selected
