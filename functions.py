@@ -1,10 +1,11 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
+import config
 from translations import _
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def timeseries_data(dataframe, granularity_level, granularity, numeric_variable):
     # drop unnecessary columns
     dataframe = dataframe[dataframe.columns.intersection([granularity_level, numeric_variable])]
@@ -15,7 +16,7 @@ def timeseries_data(dataframe, granularity_level, granularity, numeric_variable)
     return dataframe
 
 
-@st.cache_data
+@st.cache_data(show_spinner=False)
 def response_curves_data(dataframe, granularity_level, granularity):
     """
     Returns a tuple of dataframe with spend and calculated revenue data points for a granularity under granularity level
@@ -34,10 +35,10 @@ def response_curves_data(dataframe, granularity_level, granularity):
                                                           'Multiplier', 'Estimate'])]
     # In order to calculate the same number of points (100) for a wide range of spend values, we calculate the step.
     # We also want the step to be a multiple of current spend value to put it on a curve plot.
-    max_spend = 50e6
-    num_of_steps = 100
+    max_spend = config.maximum_total_spend
+    num_of_steps = 85
     i = 0
-    dataframe[f'Spd'] = 0
+    dataframe['Spd'] = 0
     mult = (max_spend / dataframe[_('Spend')].sum()) / num_of_steps
     if mult >= 1:
         dataframe['step'] = dataframe[_('Spend')] * int(mult)
@@ -69,5 +70,5 @@ def response_curves_data(dataframe, granularity_level, granularity):
     if mult >= 1:
         marker_loc = int(mult)
     else:
-        marker_loc = int(1/round(mult, 2))
+        marker_loc = int(1 / round(mult, 2))
     return curve_data, marker_loc

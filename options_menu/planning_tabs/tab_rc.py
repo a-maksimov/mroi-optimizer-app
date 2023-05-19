@@ -20,7 +20,7 @@ def plan_rc_tab(dataframe):
             granularity = list(pd.unique(dataframe.iloc[:, 0]))
         else:
             granularity = []
-        granularity_to_plot = st.multiselect(_('Select variable'),
+        granularity_to_plot = st.multiselect(_('Select variables'),
                                              options=granularity,
                                              default=granularity,
                                              key='granularity_to_rc_plot')
@@ -28,16 +28,36 @@ def plan_rc_tab(dataframe):
         granularity_level = [_(level) for level in read_data.granularity_levels if _(level) in dataframe.columns].pop()
         fig = go.Figure()
         for granularity in granularity_to_plot:
+            # get curve data with current spend marker
             curve_data, marker_loc = response_curves_data(dataframe, granularity_level, granularity)
             fig.add_trace(go.Scatter(x=curve_data['Spend'],
                                      y=curve_data['Revenue'],
                                      name=f'{granularity}',
                                      mode='lines'))
-            fig.add_trace(go.Scatter(x=[curve_data.iloc[marker_loc]['Spend']],
-                                     y=[curve_data.iloc[marker_loc]['Revenue']],
+            current_spend = curve_data.iloc[marker_loc]['Spend']
+            current_revenue = curve_data.iloc[marker_loc]['Revenue']
+            fig.add_trace(go.Scatter(x=[current_spend],
+                                     y=[current_revenue],
                                      name=f'{_("Factual Spend")} {_("on")} {granularity}',
                                      mode='markers',
-                                     marker=dict(size=15)))
+                                     marker=dict(size=15,
+                                                 opacity=0.5)))
+            if 'simulated' in st.session_state:
+                if st.session_state['simulated']:
+                    # data for simulated spend marker
+                    simulated_spend = dataframe[dataframe[granularity_level] == granularity][_('Simulated Spend')].sum()
+                    simulated_revenue = dataframe[dataframe[granularity_level] == granularity][_('Simulated Revenue')].sum()
+                    if simulated_revenue >= current_revenue:
+                        marker = 'triangle-right'
+                    else:
+                        marker = 'triangle-left'
+                    fig.add_trace(go.Scatter(x=[simulated_spend],
+                                             y=[simulated_revenue],
+                                             name=f'{_("Simulated Spend")} {_("on")} {granularity}',
+                                             mode='markers',
+                                             marker=dict(size=15,
+                                                         symbol=marker,
+                                                         opacity=0.5)))
     fig.update_layout(
         title=f'{", ".join(granularity_to_plot)}',
         legend=dict(

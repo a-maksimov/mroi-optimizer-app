@@ -1,6 +1,5 @@
-import streamlit as st
 import pandas as pd
-from translations import _
+from translations import _, translate_table
 
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
@@ -15,26 +14,6 @@ target_products = [
     'Category_1',
     'Category_2'
 ]
-
-
-def translate_table(df):
-    # translate df for filtering and display
-    df[granularity_levels] = df[granularity_levels].applymap(lambda value: _(value))
-
-    # translate columns for filtering and display
-    columns_translate = {'Product': _('Product'),
-                         'Channel': _('Channel'),
-                         'Dealership': _('Dealership'),
-                         'Format': _('Format'),
-                         'Contribution': _('Contribution'),
-                         'Spend': _('Spend'),
-                         'Revenue Calculated': _('Revenue Calculated'),
-                         'Marginal Contribution': _('Marginal Contribution'),
-                         'Weekly': _('Weekly'),
-                         'Monthly': _('Monthly'),
-                         'Yearly': _('Yearly')
-                         }
-    return df.rename(columns=columns_translate)
 
 
 def read_data(filename):

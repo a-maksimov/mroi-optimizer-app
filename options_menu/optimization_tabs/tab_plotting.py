@@ -5,21 +5,18 @@ import read_data
 from functions import timeseries_data
 
 
-def spec_plotting_tab(dataframe):
-    # drop unnecessary columns
-    dataframe = dataframe.drop([_('Marginal Contribution')], axis='columns')
-
+def opt_plotting_tab(dataframe):
     # get granularity levels
     granularity_levels = [_(level) for level in read_data.granularity_levels]
 
     # create a list of column names to plot
     col_1, col_2 = st.columns(2)
     with col_1:
-        numeric_variables = [_(variable) for variable in read_data.numeric_variables if
-                             _(variable) in dataframe.columns]
-        numeric_variables_to_plot = st.multiselect(_('Select indicators'),
-                                                   options=numeric_variables,
-                                                   default=numeric_variables)
+        numeric_variables = [_('Simulated Spend'),
+                             _('Optimized Spend')]
+        numeric_variables = [numeric_variable for numeric_variable in numeric_variables
+                             if numeric_variable in dataframe.columns]
+        numeric_variables_to_plot = st.multiselect(_('Select indicators'), numeric_variables, numeric_variables)
     with col_2:
         # check if user has selected any granularity in sidebar
         # plot only if he has

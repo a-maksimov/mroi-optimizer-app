@@ -25,7 +25,7 @@ def plan_plotting_tab(dataframe):
                     break
         else:
             granularity_options = []
-        granularity_to_plot = st.multiselect(_('Select variable'),
+        granularity_to_plot = st.multiselect(_('Select variables'),
                                              options=granularity_options,
                                              default=granularity_options)
 

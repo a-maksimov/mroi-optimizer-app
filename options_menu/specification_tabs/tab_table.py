@@ -16,6 +16,7 @@ def spec_table_tab(dataframe):
     numeric_variables = [_(variable) for variable in read_data.numeric_variables]
     dataframe[numeric_variables] = dataframe[numeric_variables].round(0)
 
+    # drop unnecessary columns
     dataframe = dataframe.drop([_('Marginal Contribution')], axis='columns')
 
     # add dimensions to the numeric columns names

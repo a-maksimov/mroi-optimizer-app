@@ -20,23 +20,39 @@ def get_planned_budget():
     return planned_budget
 
 
-def calculate_plan(df):
-    """
-    Transforms the specification dataframe by planned budget
-    returns a tuple of entered by user planned budget and transformed dataframe based on planned budget
-    """
+def simulated_top_metrics(dataframe, planned_budget):
+    """ Calculate simulated top metrics """
+    simulated_total_contribution = dataframe[_('Simulated Contribution')].sum()
+    simulated_total_revenue = dataframe[_('Simulated Revenue')].sum()
+    simulated_total_mroi = simulated_total_revenue / planned_budget
+
+    # save top metrics for Planning calculations
+    st.session_state.update({
+        'simulated_contribution': simulated_total_contribution,
+        'simulated_revenue': simulated_total_revenue,
+        'simulated_mroi': simulated_total_mroi
+    })
+
+
+def calculate_plan(dataframe):
+    """ Transforms the specification dataframe by planned budget """
+    # cleat table
+    dataframe = dataframe.fillna(0)
+    dataframe = dataframe[dataframe[_('Spend')] > 0]
+
     # get planned budget for calculations
     planned_budget = get_planned_budget()
 
-    df_plan = df.copy()
+    dataframe['Power'] = dataframe[_('Marginal Contribution')] / dataframe[_('Contribution')]
+    dataframe['Coefficient'] = dataframe[_('Contribution')] / (dataframe[_('Spend')] ** dataframe['Power'])
+    dataframe['Proportion'] = dataframe[_('Spend')] / dataframe[_('Spend')].sum()
+    dataframe['Multiplier'] = dataframe[_('Revenue Calculated')] / dataframe[_('Contribution')]
 
-    df_plan['Power'] = df_plan[_('Marginal Contribution')] / df_plan[_('Contribution')]
-    df_plan['Coefficient'] = df_plan[_('Contribution')] / (df[_('Spend')] ** df_plan['Power'])
-    df_plan['Proportion'] = df_plan[_('Spend')] / df_plan[_('Spend')].sum()
-    df_plan['Multiplier'] = df_plan[_('Revenue Calculated')] / df_plan[_('Contribution')]
+    dataframe[_('Simulated Spend')] = dataframe['Proportion'] * planned_budget
+    dataframe[_('Simulated Contribution')] = dataframe['Coefficient'] * (dataframe[_('Simulated Spend')] ** dataframe['Power'])
+    dataframe[_('Simulated Revenue')] = dataframe['Multiplier'] * dataframe[_('Simulated Contribution')]
 
-    df_plan[_('Simulated Spend')] = df_plan['Proportion'] * planned_budget
-    df_plan[_('Simulated Contribution')] = df_plan['Coefficient'] * (df_plan[_('Simulated Spend')] ** df_plan['Power'])
-    df_plan[_('Simulated Revenue')] = df_plan['Multiplier'] * df_plan[_('Simulated Contribution')]
+    # calculate simulated top metrics and save values in session state
+    simulated_top_metrics(dataframe, planned_budget)
 
-    return df_plan
+    return dataframe

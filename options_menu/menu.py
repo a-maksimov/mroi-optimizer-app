@@ -3,6 +3,7 @@ from streamlit_option_menu import option_menu
 from translations import _
 
 
+# TODO Fix a bug when sometimes menu option has to be clicked twice before switching.
 def menu():
     """ Creates horizontal options menu and manually adds the key 'menu_tracker' to st.sessions_state. """
     # create placeholder for options menu to be able to delete it later

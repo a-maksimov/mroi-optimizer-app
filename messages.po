@@ -57,8 +57,8 @@ msgstr "Выберите периодичность"
 msgid "Select granularity level"
 msgstr "Выберите уровень гранулярности"
 
-msgid "Select variable"
-msgstr "Выберите переменную"
+msgid "Select variables"
+msgstr "Выберите переменные"
 
 msgid "Select dealerships"
 msgstr "Выберите источники данных"
@@ -203,3 +203,48 @@ msgstr "Фактические расходы"
 
 msgid "on"
 msgstr "на"
+
+msgid "Simulated"
+msgstr "Моделированный"
+
+msgid "Optimized"
+msgstr "Оптимизированный"
+
+msgid "Optimizing"
+msgstr "Оптимизирую"
+
+msgid "Loading"
+msgstr "Загружаю"
+
+msgid "Optimize"
+msgstr "Оптимизировать"
+
+msgid "Reset"
+msgstr "Сброс"
+
+msgid "Optimized Spend"
+msgstr "Оптизимизированный расход"
+
+msgid "Optimized Contribution"
+msgstr "Оптизимизированный вклад"
+
+msgid "Optimized Revenue"
+msgstr "Оптизимизированный доход"
+
+msgid "Select solver"
+msgstr "Выберите решатель"
+
+msgid "Allowed decrease in spends"
+msgstr "Допустимое снижение расходов"
+
+msgid "Allowed increase in spends"
+msgstr "Допустимое повышение расходов"
+
+msgid "Lower Spend Bound"
+msgstr "Нижний предел расходов"
+
+msgid "Upper Spend Bound"
+msgstr "Верхний предел расходов"
+
+msgid "Invalid currency amount. Please enter a valid number."
+msgstr "Неверное значение валюты. Пожалуйста, введите правильное число."

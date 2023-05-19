@@ -1,10 +1,12 @@
 import streamlit as st
 from translations import _
-from options_menu import menu, about, specification, planning
+from options_menu import menu, about, specification, planning, optimization
+from config import data
 from read_data import read_data
 from sidebar import render_sidebar
 from calculate_spec import calculate_spec
 from calculate_plan import calculate_plan
+from calculate_opt import calculate_opt
 
 st.set_page_config(page_title='MROI Optimizer App',
                    page_icon=':chart_with_upwards_trend:',
@@ -14,11 +16,8 @@ st.title(':chart_with_upwards_trend: MROI Optimizer App')
 
 st.divider()
 
-# results of MMM modeling
-input_file = 'data/mmm_hierarchy.csv'
-
 # load the transformed and translated dataframe
-df = read_data(input_file)
+df = read_data(data)
 
 # create sidebar
 selection_dict = render_sidebar(df)
@@ -29,12 +28,25 @@ selected = menu.menu()
 # create pages
 if selected == _('About'):
     about.about_page()
+
 if selected == _('Specification'):
-    specification.spec_page(calculate_spec(df, selection_dict))
+    with st.spinner(f'{_("Loading")}...'):
+        specification.spec_page(
+            calculate_spec(df, selection_dict))
+
 if selected == _('Planning'):
-    planning.plan_page(calculate_plan(calculate_spec(df, selection_dict)))
+    with st.spinner(f'{_("Loading")}...'):
+        planning.plan_page(
+            calculate_plan(
+                calculate_spec(df, selection_dict)))
+
+# TODO: Add NLOPT_LD_MMA algorithm from nlopt package with possible downgrade to Python 3.10.
 if selected == _('Optimization'):
-    planning.plan_page(calculate_plan(calculate_spec(df, selection_dict)))
+    with st.spinner(f'{_("Loading")}...'):
+        optimization.opt_page(
+            calculate_opt(
+                calculate_plan(
+                    calculate_spec(df, selection_dict))))
 
 # ---- HIDE STREAMLIT STYLE ----
 hide_st_style = """

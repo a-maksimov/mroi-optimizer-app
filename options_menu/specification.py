@@ -9,8 +9,8 @@ def spec_page(df_display):
     Renders the Specification page by user selections in the sidebar
     returns tuple of top metrics
     """
-    # we access top metrics calculated and save in the session state
-    # by top_metrics() function call inside calculate_spec
+    # access top metrics calculated and saved in the session state by top_metrics() function call inside
+    # calculate_spec
     total_spend = st.session_state['budget']
     total_contribution = st.session_state['contribution']
     total_revenue = st.session_state['revenue']
@@ -31,6 +31,7 @@ def spec_page(df_display):
     tabs = st.tabs([_('Plotting'), _('Table')])
 
     # define the content of the first tab: Plotting
+    # TODO: Make separate figures with plots for 1) spends + contributions, 2) spends + revenues.
     with tabs[0]:
         tab_plotting.spec_plotting_tab(df_display)
 
