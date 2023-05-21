@@ -12,10 +12,10 @@ def plan_rc_tab(dataframe):
     with col_1:
         # check if user has selected any granularity in sidebar
         # plot only if he has
-        if any([st.session_state['selection_dict'][_('Dealership')],
-                st.session_state['selection_dict'][_('Channel')],
-                st.session_state['selection_dict'][_('Format')],
-                st.session_state['selection_dict'][_('Product')]
+        if any([st.session_state['tracking']['selection_dict'][_('Dealership')],
+                st.session_state['tracking']['selection_dict'][_('Channel')],
+                st.session_state['tracking']['selection_dict'][_('Format')],
+                st.session_state['tracking']['selection_dict'][_('Product')]
                 ]):
             granularity = list(pd.unique(dataframe.iloc[:, 0]))
         else:
@@ -42,8 +42,8 @@ def plan_rc_tab(dataframe):
                                      mode='markers',
                                      marker=dict(size=15,
                                                  opacity=0.5)))
-            if 'simulated' in st.session_state:
-                if st.session_state['simulated']:
+            if 'simulated' in st.session_state['tracking']:
+                if st.session_state['tracking']['simulated']:
                     # data for simulated spend marker
                     simulated_spend = dataframe[dataframe[granularity_level] == granularity][_('Simulated Spend')].sum()
                     simulated_revenue = dataframe[dataframe[granularity_level] == granularity][_('Simulated Revenue')].sum()

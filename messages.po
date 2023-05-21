@@ -248,3 +248,9 @@ msgstr "Верхний предел расходов"
 
 msgid "Invalid currency amount. Please enter a valid number."
 msgstr "Неверное значение валюты. Пожалуйста, введите правильное число."
+
+msgid "Optimization successfully converged!"
+msgstr "Оптимизация успешно завершена!"
+
+msgid "Optimization didn't converge to the desire criteria."
+msgstr "Оптимизация не сошлась к заданным критериям"

@@ -19,6 +19,10 @@ st.divider()
 # load the transformed and translated dataframe
 df = read_data(data)
 
+# initialize dictionary in session state for app state tracking
+if 'tracking' not in st.session_state:
+    st.session_state['tracking'] = dict()
+
 # create sidebar
 selection_dict = render_sidebar(df)
 
@@ -40,7 +44,6 @@ if selected == _('Planning'):
             calculate_plan(
                 calculate_spec(df, selection_dict)))
 
-# TODO: Add NLOPT_LD_MMA algorithm from nlopt package with possible downgrade to Python 3.10.
 if selected == _('Optimization'):
     with st.spinner(f'{_("Loading")}...'):
         optimization.opt_page(

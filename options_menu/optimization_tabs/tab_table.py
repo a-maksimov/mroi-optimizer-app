@@ -17,7 +17,7 @@ def opt_table_tab(dataframe):
     # round numeric variables
     numeric_variables = [_('Simulated Spend'), _('Simulated Contribution'), _('Simulated Revenue'),
                          _('Lower Spend Bound'), _('Upper Spend Bound')]
-    if 'df_optimized' in st.session_state:
+    if 'df_optimized' in st.session_state['tracking']:
         numeric_variables = numeric_variables + [_('Optimized Spend'),
                                                  _('Optimized Contribution'),
                                                  _('Optimized Revenue')]

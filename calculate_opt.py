@@ -10,7 +10,7 @@ def optimized_top_metrics(dataframe):
     optimized_total_mroi = optimized_total_revenue / optimized_total_spend
 
     # save top metrics for Planning calculations
-    st.session_state.update({
+    st.session_state['tracking'].update({
         'optimized_spend': optimized_total_spend,
         'optimized_contribution': optimized_total_contribution,
         'optimized_revenue': optimized_total_revenue,
@@ -29,7 +29,7 @@ def calculate_opt(dataframe):
 
     # calculate initial constraints
     # if sliders were changed on Optimization page
-    if ('lower_bound_track' in st.session_state) | ('upper_bound_track' in st.session_state):
+    if ('lower_bound_track' in st.session_state['tracking']) | ('upper_bound_track' in st.session_state['tracking']):
         # sliders are in percents and are initialized in the Optimization page
         lower_bound, upper_bound = (100 + st.session_state['lower_bound_slider']) / 100, \
             (100 + st.session_state['upper_bound_slider']) / 100
@@ -41,13 +41,10 @@ def calculate_opt(dataframe):
     dataframe[_('Upper Spend Bound')] = upper_bound * dataframe[_('Simulated Spend')]
 
     # after optimization
-    if 'df_optimized' in st.session_state:
-        # calculate optimized top metrics and save values in session state
-        if st.session_state['language_switch']:
-            get_original = True
-        else:
-            get_original = False
-        df_optimized = translate_table(st.session_state['df_optimized'], get_original=get_original)
-        optimized_top_metrics(df_optimized)
+    if 'df_optimized' in st.session_state['tracking']:
+        # translate because it is cached
+        dataframe = translate_table(st.session_state['tracking']['df_optimized'],
+                                    get_original=st.session_state['tracking']['language_switch'])
+        optimized_top_metrics(dataframe)
 
     return dataframe

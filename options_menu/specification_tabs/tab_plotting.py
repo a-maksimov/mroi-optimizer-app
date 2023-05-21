@@ -23,11 +23,11 @@ def spec_plotting_tab(dataframe):
     with col_2:
         # check if user has selected any granularity in sidebar
         # plot only if he has
-        if any([st.session_state['selection_dict'][level] for level in granularity_levels]):
+        if any([st.session_state['tracking']['selection_dict'][level] for level in granularity_levels]):
             # iterate backwards through the granularity levels and use the first one that is not empty
             for level in reversed(granularity_levels):
-                if st.session_state['selection_dict'][level]:
-                    granularity_options = st.session_state['selection_dict'][level]
+                if st.session_state['tracking']['selection_dict'][level]:
+                    granularity_options = st.session_state['tracking']['selection_dict'][level]
                     break
         else:
             granularity_options = []

@@ -11,10 +11,10 @@ def spec_page(df_display):
     """
     # access top metrics calculated and saved in the session state by top_metrics() function call inside
     # calculate_spec
-    total_spend = st.session_state['budget']
-    total_contribution = st.session_state['contribution']
-    total_revenue = st.session_state['revenue']
-    total_mroi = st.session_state['mroi']
+    total_spend = st.session_state['tracking']['budget']
+    total_contribution = st.session_state['tracking']['contribution']
+    total_revenue = st.session_state['tracking']['revenue']
+    total_mroi = st.session_state['tracking']['mroi']
 
     # render top metrics
     left_column, middle_column1, middle_column2, right_column = st.columns(4)

@@ -4,18 +4,18 @@ from translations import _
 
 def get_planned_budget():
     # display_planned_budget is initialized in the session state after this
-    if 'display_planned_budget' in st.session_state:
-        planned_budget = st.session_state['display_planned_budget']
+    if 'display_planned_budget' in st.session_state['tracking']:
+        planned_budget = st.session_state['tracking']['display_planned_budget']
     # planned_budget is the key of the text input that is rendered on the Planning page
     elif 'planned_budget' in st.session_state:
         planned_budget = float(st.session_state['planned_budget'])
     # otherwise just use the current budget from the Specification page
     else:
-        planned_budget = st.session_state['budget']
+        planned_budget = st.session_state['tracking']['budget']
 
     # initialize or update display_planned_budget in the session state
     # this can be used to fill the default value for budget text input on Planning page
-    st.session_state['display_planned_budget'] = planned_budget
+    st.session_state['tracking']['display_planned_budget'] = planned_budget
 
     return planned_budget
 
@@ -27,7 +27,7 @@ def simulated_top_metrics(dataframe, planned_budget):
     simulated_total_mroi = simulated_total_revenue / planned_budget
 
     # save top metrics for Planning calculations
-    st.session_state.update({
+    st.session_state['tracking'].update({
         'simulated_contribution': simulated_total_contribution,
         'simulated_revenue': simulated_total_revenue,
         'simulated_mroi': simulated_total_mroi

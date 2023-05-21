@@ -1,11 +1,9 @@
-import streamlit as st
 import pandas as pd
 import numpy as np
 import config
 from translations import _
 
 
-@st.cache_data(show_spinner=False)
 def timeseries_data(dataframe, granularity_level, granularity, numeric_variable):
     # drop unnecessary columns
     dataframe = dataframe[dataframe.columns.intersection([granularity_level, numeric_variable])]
@@ -16,7 +14,6 @@ def timeseries_data(dataframe, granularity_level, granularity, numeric_variable)
     return dataframe
 
 
-@st.cache_data(show_spinner=False)
 def response_curves_data(dataframe, granularity_level, granularity):
     """
     Returns a tuple of dataframe with spend and calculated revenue data points for a granularity under granularity level

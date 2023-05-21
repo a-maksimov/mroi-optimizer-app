@@ -32,7 +32,8 @@ def translate_table(dataframe, get_original=False):
     # select string columns
     string_dtypes = dataframe.head(1).convert_dtypes().select_dtypes('string')
     # translate values of string columns for filtering and display
-    dataframe[string_dtypes.columns] = dataframe[string_dtypes.columns].applymap(lambda value: _(value, get_original=get_original))
+    dataframe[string_dtypes.columns] = dataframe[string_dtypes.columns].applymap(
+        lambda value: _(value, get_original=get_original))
 
     # translate columns names for filtering and display
     columns_translate = {column: _(column, get_original=get_original) for column in dataframe.columns}
@@ -59,18 +60,20 @@ def set_language():
     global translation
     # initialize language tracking
     # set default value to False and switch between True and False
-    st.session_state['language_switch'] = not st.session_state.get('language_switch')
+    st.session_state['tracking']['language_switch'] = not st.session_state['tracking'].get('language_switch')
     # if switched back to Russian
-    if not st.session_state['language_switch']:
+    if not st.session_state['tracking']['language_switch']:
         translation = gettext.translation('messages', localedir='locales', languages=[languages['Русский']])
-        # translate values in session state
-        st.session_state = {key: translate_nest(value) for key, value in st.session_state.items()}
+        # translate tracking in session state
+        st.session_state['tracking'].update({key: translate_nest(value)
+                                             for key, value in st.session_state['tracking'].items()})
     # if switched to English
     else:
         # translate values in session state
         translation = gettext.NullTranslations()
-        # translate values in session state
-        st.session_state = {key: translate_nest(value, get_original=True) for key, value in st.session_state.items()}
+        # translate tracking values in session state
+        st.session_state['tracking'].update({key: translate_nest(value, get_original=True)
+                                             for key, value in st.session_state['tracking'].items()})
     # reload all translations
     translation.install()
 

@@ -11,7 +11,7 @@ def top_metrics(df_selection):
     total_mroi = total_revenue / total_spend
 
     # save top metrics for Specification and Planning calculations
-    st.session_state.update({
+    st.session_state['tracking'].update({
         'budget': total_spend,
         'contribution': total_contribution,
         'revenue': total_revenue,
