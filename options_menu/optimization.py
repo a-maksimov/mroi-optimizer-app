@@ -52,7 +52,8 @@ def save_solver():
 
 def render_solver_select():
     """ Create solver selection menu """
-    solvers_list = ['L-BFGS-B', 'NLOP_LD_MMA', 'SLSQP']
+    solvers_list = ['L-BFGS-B', 'SLSQP']
+    # solvers_list = ['L-BFGS-B', 'NLOP_LD_MMA', 'SLSQP']
     if 'selected_solver' not in st.session_state['tracking']:
         index = solvers_list.index('L-BFGS-B')
     else:
