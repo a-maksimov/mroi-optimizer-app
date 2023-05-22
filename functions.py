@@ -14,7 +14,7 @@ def timeseries_data(dataframe, granularity_level, granularity, numeric_variable)
     return dataframe
 
 
-def response_curves_data(dataframe, granularity_level, granularity):
+def response_curves_data(dataframe, granularity_level, granularity, max_spend, number_of_steps):
     """
     Returns a tuple of dataframe with spend and calculated revenue data points for a granularity under granularity level
     and an index of a point with current spend and corresponding revenue.
@@ -32,11 +32,9 @@ def response_curves_data(dataframe, granularity_level, granularity):
                                                           'Multiplier', 'Estimate'])]
     # In order to calculate the same number of points (100) for a wide range of spend values, we calculate the step.
     # We also want the step to be a multiple of current spend value to put it on a curve plot.
-    max_spend = config.maximum_total_spend
-    num_of_steps = 85
     i = 0
     dataframe['Spd'] = 0
-    mult = (max_spend / dataframe[_('Spend')].sum()) / num_of_steps
+    mult = (max_spend / dataframe[_('Spend')].sum()) / number_of_steps
     if mult >= 1:
         dataframe['step'] = dataframe[_('Spend')] * int(mult)
     else:

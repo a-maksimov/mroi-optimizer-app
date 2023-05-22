@@ -33,7 +33,7 @@ def handle_plan_input():
 
 
 # TODO: Make planned budget input widget more user friendly: scaling and validation.
-def plan_input():
+def plan_input(dataframe):
     """
     Input for planned budget.
     Validates user input and returns the value.
@@ -41,7 +41,7 @@ def plan_input():
     # display_planned_budget is initialized in the calculate_plan
     input_planned_budget = st.number_input(f'{_("Enter planned budget") + ", €"}',
                                            value=st.session_state['tracking']['display_planned_budget'],
-                                           max_value=config.maximum_total_spend,
+                                           max_value=dataframe[_('Spend')].sum() * 2,
                                            min_value=0.0,
                                            step=1000.0,
                                            key='planned_budget',
@@ -65,7 +65,7 @@ def plan_page(dataframe):
     # display text input for simulated budget
     input_col, *padding = st.columns(4)
     with input_col:
-        planned_budget = plan_input()
+        planned_budget = plan_input(dataframe)
 
     # display simulated top metrics
     left_column, middle_column1, middle_column2, right_column = st.columns(4)

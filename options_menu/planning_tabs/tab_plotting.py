@@ -60,6 +60,7 @@ def plan_plotting_tab(dataframe):
                               )
 
     fig.update_layout(
+        height=600,
         title=f'{", ".join(numeric_variables_to_plot)}',
         xaxis_tickformatstops=[
             dict(dtickrange=[604800000, 'M1'], value='%d-%m-%Y'),
@@ -69,7 +70,7 @@ def plan_plotting_tab(dataframe):
         legend=dict(
             orientation='h',
             yanchor='bottom',
-            y=-1.02,
+            y=-0.5,
             xanchor='right',
             x=1
         ),

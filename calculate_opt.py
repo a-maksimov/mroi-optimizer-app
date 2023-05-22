@@ -1,5 +1,5 @@
 import streamlit as st
-from translations import _, translate_table
+from translations import _
 
 
 def optimized_top_metrics(dataframe):
@@ -27,24 +27,25 @@ def calculate_opt(dataframe):
     dataframe = dataframe.fillna(0)
     dataframe = dataframe[dataframe[_('Simulated Spend')] > 0]
 
-    # calculate initial constraints
-    # if sliders were changed on Optimization page
-    if ('lower_bound_track' in st.session_state['tracking']) | ('upper_bound_track' in st.session_state['tracking']):
-        # sliders are in percents and are initialized in the Optimization page
-        lower_bound, upper_bound = (100 + st.session_state['lower_bound_slider']) / 100, \
-            (100 + st.session_state['upper_bound_slider']) / 100
-    # if sliders haven't been changed yet in the Optimization set
-    else:
-        lower_bound, upper_bound = 0.8, 1.2
-
-    dataframe[_('Lower Spend Bound')] = lower_bound * dataframe[_('Simulated Spend')]
-    dataframe[_('Upper Spend Bound')] = upper_bound * dataframe[_('Simulated Spend')]
-
     # after optimization
     if 'df_optimized' in st.session_state['tracking']:
-        # translate because it is cached
-        dataframe = translate_table(st.session_state['tracking']['df_optimized'],
-                                    get_original=st.session_state['tracking']['language_switch'])
+        dataframe = st.session_state['tracking']['df_optimized']
         optimized_top_metrics(dataframe)
+
+    # calculate initial boundaries
+    if not (('lower_bound_track' in st.session_state['tracking']) | (
+            'upper_bound_track' in st.session_state['tracking'])):
+        # sliders are in percents
+        lower_bound, upper_bound = 0.8, 1.2
+        # initialize boundary tracking
+        st.session_state['tracking']['lower_bound_track'] = -20
+        st.session_state['tracking']['upper_bound_track'] = 20
+    else:
+        lower_bound = st.session_state['tracking']['lower_bound_track']
+        upper_bound = st.session_state['tracking']['upper_bound_track']
+
+    # calculate boundaries
+    dataframe[_('Lower Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + lower_bound) / 100
+    dataframe[_('Upper Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + upper_bound) / 100
 
     return dataframe

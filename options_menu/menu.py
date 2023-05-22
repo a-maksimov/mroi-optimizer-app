@@ -1,29 +1,17 @@
-import streamlit as st
 from streamlit_option_menu import option_menu
 from translations import _
 
 
-# TODO Fix a bug when sometimes menu option has to be clicked twice before switching.
 def menu():
-    """ Creates horizontal options menu and manually adds the key 'menu_tracker' to st.sessions_state. """
+    """ Creates horizontal options menu and adds the key 'menu_tracker' to st.sessions_state. """
     # create placeholder for options menu to be able to delete it later
-    menu_placeholder = st.empty()
     options = [_('About'), _('Specification'), _('Planning'), _('Optimization')]
-    # initialize menu tracker
-    if 'menu_track' not in st.session_state['tracking']:
-        st.session_state['tracking']['menu_track'] = 1
-    # delete options menu because it glitches
-    else:
-        menu_placeholder.empty()
-
-    with menu_placeholder:
-        selected = option_menu(
-            menu_title=None,
-            options=options,
-            icons=['question-circle', 'bar-chart-fill', 'graph-up', 'sliders'],
-            menu_icon='cast',
-            default_index=st.session_state['tracking']['menu_track'],
-            orientation='horizontal',
-        )
-    st.session_state['tracking']['menu_track'] = options.index(selected)
+    selected = option_menu(
+        menu_title=None,
+        options=options,
+        icons=['question-circle', 'bar-chart-fill', 'graph-up', 'sliders'],
+        menu_icon='cast',
+        default_index=1,
+        orientation='horizontal'
+    )
     return selected

@@ -1,5 +1,6 @@
 import streamlit as st
 import pandas as pd
+import numpy as np
 import plotly.graph_objects as go
 from translations import _
 import read_data
@@ -26,10 +27,14 @@ def plan_rc_tab(dataframe):
                                              key='granularity_to_rc_plot')
         # get the lowest granularity level from the selected
         granularity_level = [_(level) for level in read_data.granularity_levels if _(level) in dataframe.columns].pop()
+        # upper limit is twice maximum spend
+        max_spend = np.max(dataframe.groupby(granularity_level)[_('Spend')].sum()) * 2
+        number_of_steps = 100
         fig = go.Figure()
         for granularity in granularity_to_plot:
             # get curve data with current spend marker
-            curve_data, marker_loc = response_curves_data(dataframe, granularity_level, granularity)
+            curve_data, marker_loc = response_curves_data(dataframe, granularity_level,
+                                                          granularity, max_spend, number_of_steps)
             fig.add_trace(go.Scatter(x=curve_data['Spend'],
                                      y=curve_data['Revenue'],
                                      name=f'{granularity}',
@@ -59,11 +64,12 @@ def plan_rc_tab(dataframe):
                                                          symbol=marker,
                                                          opacity=0.5)))
     fig.update_layout(
+        height=600,
         title=f'{", ".join(granularity_to_plot)}',
         legend=dict(
             orientation='h',
             yanchor='bottom',
-            y=-1.02,
+            y=-0.5,
             xanchor='right',
             x=1
         ),

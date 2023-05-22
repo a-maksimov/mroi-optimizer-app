@@ -98,7 +98,6 @@ def render_language():
                                 on_change=set_language)
 
 
-# TODO: Date input validation
 def render_date(dataframe):
     # date UI
     start_date = dataframe['Date'].min()
@@ -110,7 +109,10 @@ def render_date(dataframe):
         value=(start_date, end_date),
         key='date_range'
     )
-    return date_range
+    if len(date_range) == 2:
+        return date_range
+    else:
+        st.stop()
 
 
 def clear_all():
@@ -215,12 +217,14 @@ def render_sidebar(dataframe):
     start_date, end_date = render_date(dataframe)
     selection_dict.update({'Start_date': start_date, 'End_date': end_date})
 
+    # TODO: reset planning and optimization on change of periodicity
     # create periodicity selection widget
     periodicity = st.sidebar.selectbox(
         _('Select Periodicity'),
         options=[_(periodicity) for periodicity in read_data.periodicity_list],
         index=0,
-        key='periodicity'
+        key='periodicity',
+        on_change=reset_optimization
     )
     selection_dict['Periodicity'] = periodicity
 

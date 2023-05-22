@@ -6,6 +6,9 @@ from options_menu.optimization_tabs import tab_table, tab_plotting
 from options_menu.planning import plan_input
 import solvers
 
+solvers_list = ['L-BFGS-B', 'SLSQP']
+# solvers_list = ['L-BFGS-B', 'NLOP_LD_MMA', 'SLSQP']
+
 
 def reset_optimization():
     """ Resets optimization by deleting optimized dataframe from session state """
@@ -52,8 +55,6 @@ def save_solver():
 
 def render_solver_select():
     """ Create solver selection menu """
-    solvers_list = ['L-BFGS-B', 'SLSQP']
-    # solvers_list = ['L-BFGS-B', 'NLOP_LD_MMA', 'SLSQP']
     if 'selected_solver' not in st.session_state['tracking']:
         index = solvers_list.index('L-BFGS-B')
     else:
@@ -95,7 +96,7 @@ def opt_page(dataframe):
 
     with input_col:
         # display simulated budget input widget
-        planned_budget = plan_input()
+        planned_budget = plan_input(dataframe)
 
         # display solver select
         render_solver_select()
@@ -103,27 +104,28 @@ def opt_page(dataframe):
         # create optimize button
         optimize_button(dataframe)
 
-    # display boundary sliders
-    # initialize boundary selection tracking
-    if ('lower_bound_track' not in st.session_state) | ('upper_boundary_track' not in st.session_state):
+    if not (('lower_bound_track' in st.session_state['tracking']) | (
+            'upper_bound_track' in st.session_state['tracking'])):
         lower_bound, upper_bound = -20, 20
     else:
-        lower_bound, upper_bound = st.session_state['lower_bound_track'], st.session_state['upper_bound_track']
+        lower_bound = st.session_state['tracking']['lower_bound_track']
+        upper_bound = st.session_state['tracking']['upper_bound_track']
 
+    # display boundary sliders
     with sliders_col:
         create_slider(f'{_("Allowed decrease in spends")}, %',
                       value=lower_bound,
+                      boundary='lower',
                       min_value=-50,
                       max_value=0,
-                      key='lower_bound_slider',
-                      boundary='lower')
+                      key='lower_bound_slider')
 
         create_slider(f'{_("Allowed increase in spends")}, %',
                       value=upper_bound,
+                      boundary='upper',
                       min_value=0,
                       max_value=50,
-                      key='upper_bound_slider',
-                      boundary='upper')
+                      key='upper_bound_slider')
 
     # display simulated top metrics
     left_column, middle_column1, middle_column2, right_column = st.columns(4)
@@ -188,13 +190,12 @@ def opt_page(dataframe):
     # create a tab layout
     tabs = st.tabs([_('Plotting'), _('Table')])
 
-    # define the content of the first tab: Plotting
-    with tabs[0]:
+    # TODO: Make separate figures with plots for 1) spends + contributions, 2) spends + revenues.
+    #       Make aggregated plots to compare before/after optimization.
+    # define the content of the second tab: Plotting
+    with tabs[1]:
         tab_plotting.opt_plotting_tab(dataframe)
 
-    # TODO: Make separate figures with plots for 1) spends + contributions, 2) spends + revenues.
-    #       Make plots taller.
-    #       Make aggregated plots to compare before/after optimization.
     # define the content of the first tab: Table
-    with tabs[1]:
+    with tabs[0]:
         tab_table.opt_table_tab(dataframe)
