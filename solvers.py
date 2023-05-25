@@ -1,5 +1,5 @@
 from scipy.optimize import minimize
-# import nlopt
+import nlopt
 import numpy as np
 from translations import _
 
@@ -112,6 +112,7 @@ def nlopt_ld_mma(dataframe):
     :param dataframe:
     :return: optimized dataframe
     """
+
     # define objective function
     def eval_f(x, grad):
         objective = -np.sum(dataframe[_('Coefficient')] * np.power(x, dataframe['Power']))
@@ -156,3 +157,10 @@ def nlopt_ld_mma(dataframe):
     dataframe[_('Optimized Revenue')] = dataframe['Multiplier'] * dataframe[_('Optimized Contribution')]
 
     return dataframe, res.last_optimize_result() > 0
+
+
+solvers_dict = {
+    'NLOP_LD_MMA': nlopt_ld_mma,
+    'SLSQP': slsqp,
+    'L-BFGS-B': l_bfgs_b
+}

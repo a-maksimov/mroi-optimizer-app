@@ -1,5 +1,4 @@
 import streamlit as st
-import config
 from translations import _
 import utils
 from options_menu.planning_tabs import tab_table, tab_plotting, tab_rc
@@ -46,6 +45,7 @@ def plan_input(dataframe):
                                            step=1000.0,
                                            key='planned_budget',
                                            on_change=handle_plan_input)
+
     return input_planned_budget
 
 
@@ -93,18 +93,20 @@ def plan_page(dataframe):
                   delta=utils.display_percent(st.session_state['tracking']['mroi'], simulated_total_mroi))
 
     # create a tab layout
-    tabs = st.tabs([_('Response Curves'), _('Table'), _('Plotting')])
+    tabs = st.tabs([ _('Plotting'), _('Response Curves'), _('Table')])
 
     # define the content of the third tab: Response Curves
-    # TODO: Add add some kind of shifting visualisations from current spend to planned budget.
-    #  Guarantee colors for plots and markers (define palette)
+    #  TODO: Guarantee colors for plots and markers (define palette)
+    # define the content of the first tab: Plotting
     with tabs[0]:
+        tab_plotting.plan_plotting_tab(dataframe)
+
+    # define the content of the first tab: Response Curves
+    with tabs[1]:
         tab_rc.plan_rc_tab(dataframe)
 
-    # define the content of the first tab: Table
-    with tabs[1]:
+    # define the content of the third tab: Table
+    with tabs[2]:
         tab_table.plan_table_tab(dataframe)
 
-    # define the content of the second tab: Plotting
-    with tabs[2]:
-        tab_plotting.plan_plotting_tab(dataframe)
+

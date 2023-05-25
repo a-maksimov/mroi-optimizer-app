@@ -98,6 +98,7 @@ def render_language():
                                 on_change=set_language)
 
 
+# TODO: Reset planning and optimization after date range change.
 def render_date(dataframe):
     # date UI
     start_date = dataframe['Date'].min()

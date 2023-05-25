@@ -1,17 +1,63 @@
 import pandas as pd
 import numpy as np
-import config
 from translations import _
 
 
-def timeseries_data(dataframe, granularity_level, granularity, numeric_variable):
-    # drop unnecessary columns
-    dataframe = dataframe[dataframe.columns.intersection([granularity_level, numeric_variable])]
+def timeseries_data_stacked(dataframe, granularity_level, granularity, numeric_variable, percents=False):
+    if granularity_level:
+        # drop unnecessary columns
+        dataframe = dataframe[dataframe.columns.intersection([granularity_level, numeric_variable])].copy()
 
-    # filter dataframe for single variable
-    dataframe = dataframe[dataframe[granularity_level] == granularity]
+        if percents:
+            # group by date index and calculate the sum of numeric variable
+            df_grouped = dataframe.groupby(dataframe.index)[numeric_variable].sum()
 
-    return dataframe
+            # merge original DataFrame with grouped DataFrame
+            df_merged = dataframe.merge(df_grouped, left_index=True, right_on=df_grouped.index, suffixes=('', '_sum'))
+
+            # calculate percents
+            dataframe[numeric_variable] = 100 * (df_merged[numeric_variable] / df_merged[numeric_variable + '_sum'])
+
+        # filter for single granularity
+        dataframe = dataframe[dataframe[granularity_level] == granularity]
+
+        return dataframe
+
+
+def timeseries_data(dataframe, granularity_level, numeric_variable, percents=False):
+    if granularity_level:
+        # drop unnecessary columns
+        dataframe = dataframe[dataframe.columns.intersection([granularity_level, numeric_variable])].copy()
+
+        if percents:
+            # group by date index and calculate the sum of numeric variable
+            df_grouped = dataframe.groupby(dataframe.index)[numeric_variable].sum()
+
+            # merge original DataFrame with grouped DataFrame
+            df_merged = dataframe.merge(df_grouped, left_index=True, right_on=df_grouped.index, suffixes=('', '_sum'))
+
+            # calculate percents
+            dataframe[numeric_variable] = 100 * (df_merged[numeric_variable] / df_merged[numeric_variable + '_sum'])
+
+        return dataframe
+
+
+def mroi_plot(dataframe, granularity_level, numeric_variables, percents=False):
+    if granularity_level:
+        # drop unnecessary columns
+        dataframe = dataframe[dataframe.columns.intersection([granularity_level] + numeric_variables)].copy()
+
+        # calculate percents
+        percent_variables = []
+        if percents:
+            pct = '_pct'
+            percent_variables = [variable + pct for variable in numeric_variables]
+            dataframe[percent_variables] = (100 * (dataframe[numeric_variables] / dataframe[numeric_variables].sum()))
+
+        # get aggregated data
+        dataframe = dataframe.groupby(granularity_level)[numeric_variables + percent_variables].sum()
+
+        return dataframe
 
 
 def response_curves_data(dataframe, granularity_level, granularity, max_spend, number_of_steps):
@@ -67,3 +113,42 @@ def response_curves_data(dataframe, granularity_level, granularity, max_spend, n
     else:
         marker_loc = int(1 / round(mult, 2))
     return curve_data, marker_loc
+
+
+def bar_data(dataframe, granularity_level, granularity_to_plot, numeric_variables, percents=False):
+    if granularity_level:
+        # filter out variables that are unselected
+        dataframe = dataframe[dataframe[granularity_level].isin(granularity_to_plot)].copy()
+
+        # calculate percents
+        if percents:
+            dataframe[numeric_variables] = (100 * (dataframe[numeric_variables] /
+                                                   dataframe[numeric_variables].sum()))
+
+        # get aggregated data
+        dataframe = dataframe.groupby(granularity_level)[numeric_variables].sum()
+
+        return dataframe
+
+
+def stacked_bar_data(dataframe, granularity_level, granularity_to_plot, numeric_variables, percents=False):
+    # filter out variables that are unselected
+    dataframe = dataframe[dataframe[granularity_level].isin(granularity_to_plot)]
+
+    # filter out columns
+    dataframe = dataframe[dataframe.columns.intersection([granularity_level] + numeric_variables)]
+
+    # calculate percents
+    if percents:
+        dataframe[numeric_variables] = (100 * (dataframe[numeric_variables] /
+                                               dataframe[numeric_variables].sum())).copy()
+
+    # get aggregated data
+    dataframe = dataframe.groupby(granularity_level)[numeric_variables].sum().reset_index()
+    if numeric_variables:
+        dataframe = dataframe.sort_values(numeric_variables[0], ascending=False)
+
+    # melt spends
+    dataframe = pd.melt(dataframe, id_vars=granularity_level, var_name=_('Spend'), value_name='value')
+
+    return dataframe

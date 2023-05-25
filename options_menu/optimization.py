@@ -6,9 +6,6 @@ from options_menu.optimization_tabs import tab_table, tab_plotting
 from options_menu.planning import plan_input
 import solvers
 
-solvers_list = ['L-BFGS-B', 'SLSQP']
-# solvers_list = ['L-BFGS-B', 'NLOP_LD_MMA', 'SLSQP']
-
 
 def reset_optimization():
     """ Resets optimization by deleting optimized dataframe from session state """
@@ -18,19 +15,13 @@ def reset_optimization():
 
 def optimize(dataframe, selected_solver):
     """ Run Spend Based Optimization and save optimized dataframe to session state """
+    solver = solvers.solvers_dict[selected_solver]
+    # store optimized dataframe and the result of optimization convergence (boolean)
     with st.spinner(f'{_("Optimizing")}...'):
-        if selected_solver == 'L-BFGS-B':
-            solver = solvers.l_bfgs_b
-        elif selected_solver == 'NLOP_LD_MMA':
-            solver = solvers.nlopt_ld_mma
-        else:  # SLSQP
-            solver = solvers.slsqp
-
-        # store optimized dataframe and the result of optimization convergence (boolean)
         df_optimized, success = solver(dataframe)
-        st.session_state['tracking']['df_optimized'] = df_optimized
-        st.session_state['tracking']['success'] = success
-        st.session_state['tracking']['used_solver'] = st.session_state['solver']
+    st.session_state['tracking']['df_optimized'] = df_optimized
+    st.session_state['tracking']['success'] = success
+    st.session_state['tracking']['used_solver'] = st.session_state['solver']
 
 
 def optimize_button(dataframe):
@@ -55,11 +46,7 @@ def save_solver():
 
 def render_solver_select():
     """ Create solver selection menu """
-    if 'selected_solver' not in st.session_state['tracking']:
-        index = solvers_list.index('L-BFGS-B')
-    else:
-        index = solvers_list.index(st.session_state['tracking']['selected_solver'])
-    return st.selectbox(_('Select solver'), options=solvers_list, index=index, key='solver', on_change=save_solver)
+    return st.selectbox(_('Select solver'), options=solvers.solvers_dict, key='solver', on_change=save_solver)
 
 
 def update_boundary(boundary):
@@ -156,9 +143,9 @@ def opt_page(dataframe):
         with success_col:
             solver = st.session_state['tracking']['used_solver']
             if st.session_state['tracking']['success']:
-                st.success(_('Optimization successfully converged!') + f'({solver})')
+                st.success(_('Optimization successfully converged!') + f' ({solver})')
             else:
-                st.error(_('Optimization did not converge.') + f'({solver})')
+                st.error(_('Optimization did not converge.') + f' ({solver})')
         # access optimized top metrics calculated and saved in the session state by optimized_top_metrics() function
         # call inside calculate_opt
         optimized_total_spend = st.session_state['tracking']['optimized_spend']
@@ -193,9 +180,9 @@ def opt_page(dataframe):
     # TODO: Make separate figures with plots for 1) spends + contributions, 2) spends + revenues.
     #       Make aggregated plots to compare before/after optimization.
     # define the content of the second tab: Plotting
-    with tabs[1]:
+    with tabs[0]:
         tab_plotting.opt_plotting_tab(dataframe)
 
     # define the content of the first tab: Table
-    with tabs[0]:
+    with tabs[1]:
         tab_table.opt_table_tab(dataframe)

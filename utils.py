@@ -1,3 +1,4 @@
+import streamlit as st
 import re
 from translations import _
 
@@ -30,3 +31,25 @@ def validate_currency_input(input_text):
         return None
 
     return value
+
+
+def flip_checkbox_track(key):
+    """ Callback function that is called on sidebar checkboxes change and tracks its values in between re-rendering """
+    key_checkbox_track = key + '_track'
+    # flip the checkbox tracked value
+    st.session_state['tracking'][key_checkbox_track] = not st.session_state['tracking'][key_checkbox_track]
+
+
+def create_checkbox(key):
+    """ Create Percents checkbox """
+    # initialize checkbox value tracking
+    key_checkbox_track = key + '_track'
+    if key_checkbox_track not in st.session_state['tracking']:
+        st.session_state['tracking'][key_checkbox_track] = False
+
+    # create percents checkbox
+    st.checkbox(_('Percents'),
+                value=st.session_state['tracking'][key_checkbox_track],
+                key=key,
+                on_change=flip_checkbox_track,
+                args=(key,))

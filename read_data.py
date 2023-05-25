@@ -3,7 +3,7 @@ from translations import _, translate_table
 
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
-periodicity_list = ['Weekly', 'Monthly', 'Yearly']
+periodicity_list = ['Yearly', 'Monthly', 'Weekly']
 target_products = [
     'Brand',
     'Product_1',
@@ -20,27 +20,27 @@ def read_data(filename):
     """
     Loads results of MMM modeling and returns the transformed and translated dataframe
     """
-    df = pd.read_csv(filename)
+    dataframe = pd.read_csv(filename)
 
     # keep only products related to target variable
-    df = df[df['Product'].isin(target_products)]
+    dataframe = dataframe[dataframe['Product'].isin(target_products)]
 
-    df = df[df['Power'] > 0].copy()  # remove unspecified variables
-    df['Contribution'] = df['Contribution'] * 1000  # original numbers are in thousands kgs
-    df['Revenue Calculated'] = df['Contribution'] * df['Multiplier']  # calculate revenue
-    df['Marginal Contribution'] = df['Contribution'] * df['Power']
-    df = df[df[numeric_variables].sum(axis=1) != 0]  # remove zero sum rows
+    dataframe = dataframe[dataframe['Power'] > 0].copy()  # remove unspecified variables
+    dataframe['Contribution'] = dataframe['Contribution'] * 1000  # original numbers are in thousands kgs
+    dataframe['Revenue Calculated'] = dataframe['Contribution'] * dataframe['Multiplier']  # calculate revenue
+    dataframe['Marginal Contribution'] = dataframe['Contribution'] * dataframe['Power']
+    dataframe = dataframe[dataframe[numeric_variables].sum(axis=1) != 0]  # remove zero sum rows
 
-    df = df.reset_index(drop=True)
+    dataframe = dataframe.reset_index(drop=True)
 
-    df['Date'] = pd.to_datetime(df['Date'])
+    dataframe['Date'] = pd.to_datetime(dataframe['Date'])
 
     # expand the Date by periodicity_list
     for periodicity in periodicity_list:
         # get frequency by the first letter of periodicity
-        df[periodicity] = df['Date'].dt.to_period(periodicity[0])
+        dataframe[periodicity] = dataframe['Date'].dt.to_period(periodicity[0])
 
-    return translate_table(df)
+    return translate_table(dataframe)
 
 
 def get_level_of_granularity(dataframe, current_level, prev_levels_dict=None):

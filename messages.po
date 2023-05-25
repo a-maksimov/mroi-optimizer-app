@@ -13,7 +13,7 @@ msgid "Format"
 msgstr "Медиа-формат"
 
 msgid "Product"
-msgstr "Продукт"
+msgstr "Рекламная кампания"
 
 msgid "Contribution"
 msgstr "Вклад"
@@ -70,7 +70,7 @@ msgid "Select formats"
 msgstr "Выберите медиа-форматы"
 
 msgid "Select products"
-msgstr "Выберите продукты"
+msgstr "Выберите рекламные кампании"
 
 msgid "Total budget"
 msgstr "Общий бюджет"
@@ -205,7 +205,7 @@ msgid "on"
 msgstr "на"
 
 msgid "Simulated"
-msgstr "Моделированный"
+msgstr "Смоделированный"
 
 msgid "Optimized"
 msgstr "Оптимизированный"
@@ -223,13 +223,13 @@ msgid "Reset"
 msgstr "Сброс"
 
 msgid "Optimized Spend"
-msgstr "Оптизимизированный расход"
+msgstr "Оптимизированный расход"
 
 msgid "Optimized Contribution"
-msgstr "Оптизимизированный вклад"
+msgstr "Оптимизированный вклад"
 
 msgid "Optimized Revenue"
-msgstr "Оптизимизированный доход"
+msgstr "Оптимизированный доход"
 
 msgid "Select solver"
 msgstr "Выберите решатель"
@@ -254,3 +254,15 @@ msgstr "Оптимизация успешно завершена!"
 
 msgid "Optimization didn't converge to the desire criteria."
 msgstr "Оптимизация не сошлась к заданным критериям"
+
+msgid "Percents"
+msgstr "Проценты"
+
+msgid "Spends before and after optimization"
+msgstr "Расходы до и после оптимизации"
+
+msgid "Revenues before and after optimization"
+msgstr "Доходы до и после оптимизации"
+
+msgid "Budget Allocation"
+msgstr "Аллокация бюджета"

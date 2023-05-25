@@ -6,6 +6,8 @@ from translations import _
 import read_data
 from functions import response_curves_data
 
+number_of_steps = 85
+
 
 def plan_rc_tab(dataframe):
     # create a list of column names to plot
@@ -29,7 +31,6 @@ def plan_rc_tab(dataframe):
         granularity_level = [_(level) for level in read_data.granularity_levels if _(level) in dataframe.columns].pop()
         # upper limit is twice maximum spend
         max_spend = np.max(dataframe.groupby(granularity_level)[_('Spend')].sum()) * 2
-        number_of_steps = 100
         fig = go.Figure()
         for granularity in granularity_to_plot:
             # get curve data with current spend marker
@@ -47,22 +48,22 @@ def plan_rc_tab(dataframe):
                                      mode='markers',
                                      marker=dict(size=15,
                                                  opacity=0.5)))
-            if 'simulated' in st.session_state['tracking']:
-                if st.session_state['tracking']['simulated']:
-                    # data for simulated spend marker
-                    simulated_spend = dataframe[dataframe[granularity_level] == granularity][_('Simulated Spend')].sum()
-                    simulated_revenue = dataframe[dataframe[granularity_level] == granularity][_('Simulated Revenue')].sum()
-                    if simulated_revenue >= current_revenue:
-                        marker = 'triangle-right'
-                    else:
-                        marker = 'triangle-left'
-                    fig.add_trace(go.Scatter(x=[simulated_spend],
-                                             y=[simulated_revenue],
-                                             name=f'{_("Simulated Spend")} {_("on")} {granularity}',
-                                             mode='markers',
-                                             marker=dict(size=15,
-                                                         symbol=marker,
-                                                         opacity=0.5)))
+            if 'simulated' in st.session_state['tracking'] and st.session_state['tracking']['simulated']:
+                # data for simulated spend marker
+                simulated_spend = dataframe[dataframe[granularity_level] == granularity][_('Simulated Spend')].sum()
+                simulated_revenue = dataframe[dataframe[granularity_level] == granularity][
+                    _('Simulated Revenue')].sum()
+                if simulated_revenue >= current_revenue:
+                    marker = 'triangle-right'
+                else:
+                    marker = 'triangle-left'
+                fig.add_trace(go.Scatter(x=[simulated_spend],
+                                         y=[simulated_revenue],
+                                         name=f'{_("Simulated Spend")} {_("on")} {granularity}',
+                                         mode='markers',
+                                         marker=dict(size=15,
+                                                     symbol=marker,
+                                                     opacity=0.5)))
     fig.update_layout(
         height=600,
         title=f'{", ".join(granularity_to_plot)}',
