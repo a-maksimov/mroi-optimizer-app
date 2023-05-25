@@ -120,20 +120,14 @@ def spec_plotting_tab(dataframe):
     # calculate mroi data
     data = mroi_plot(dataframe, level, numeric_variables, percents=percents)
     if data is not None:
-        fig.add_trace(go.Bar(x=data.index,
-                             y=data[_('Spend') + pct],
-                             name=data[_('Spend')].name,
-                             opacity=0.6,
-                             xperiodalignment='middle',
-                             )
-                      )
-        fig.add_trace(go.Bar(x=data.index,
-                             y=data[_('Revenue Calculated') + pct],
-                             name=data[_('Revenue Calculated')].name,
-                             opacity=0.6,
-                             xperiodalignment='middle',
-                             )
-                      )
+        for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
+            fig.add_trace(go.Bar(x=data.index,
+                                 y=data[variable + pct],
+                                 name=data[variable].name,
+                                 opacity=0.6,
+                                 xperiodalignment='middle',
+                                 )
+                          )
         mroi_data = data[_('Revenue Calculated')] / data[_('Spend')]
         fig.add_trace(go.Scatter(x=data.index,
                                  y=mroi_data,

@@ -187,20 +187,14 @@ def opt_plotting_tab(dataframe):
     # calculate mroi data
     data = mroi_plot(dataframe, level, simulated_numeric_variables, percents=percents)
     if data is not None:
-        fig.add_trace(go.Bar(x=data.index,
-                             y=data[_('Simulated Spend') + pct],
-                             name=data[_('Simulated Spend')].name,
-                             opacity=0.6,
-                             xperiodalignment='middle',
-                             )
-                      )
-        fig.add_trace(go.Bar(x=data.index,
-                             y=data[_('Simulated Revenue') + pct],
-                             name=data[_('Simulated Revenue')].name,
-                             opacity=0.6,
-                             xperiodalignment='middle',
-                             )
-                      )
+        for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
+            fig.add_trace(go.Bar(x=data.index,
+                                 y=data[variable + pct],
+                                 name=data[_('Simulated Spend')].name,
+                                 opacity=0.6,
+                                 xperiodalignment='middle',
+                                 )
+                          )
         mroi_data = data[_('Simulated Revenue')] / data[_('Simulated Spend')]
         fig.add_trace(go.Scatter(x=data.index,
                                  y=mroi_data,
@@ -223,7 +217,8 @@ def opt_plotting_tab(dataframe):
                 text=round(text, 2),
                 showarrow=False,
                 font=dict(color='black'),
-                xshift=20,
+                yshift=10,
+                xshift=-20,
                 yref='y2',
                 opacity=0.6
 
@@ -232,20 +227,14 @@ def opt_plotting_tab(dataframe):
         if 'df_optimized' in st.session_state['tracking']:
             data = mroi_plot(dataframe, level, optimized_numeric_variables, percents=percents)
             if data is not None:
-                fig.add_trace(go.Bar(x=data.index,
-                                     y=data[_('Optimized Spend') + pct],
-                                     name=data[_('Optimized Spend')].name,
-                                     opacity=0.6,
-                                     xperiodalignment='middle',
-                                     )
-                              )
-                fig.add_trace(go.Bar(x=data.index,
-                                     y=data[_('Optimized Revenue') + pct],
-                                     name=data[_('Optimized Revenue')].name,
-                                     opacity=0.6,
-                                     xperiodalignment='middle',
-                                     )
-                              )
+                for variable in sorted(set(numeric_variables_to_plot).intersection(optimized_numeric_variables)):
+                    fig.add_trace(go.Bar(x=data.index,
+                                         y=data[variable + pct],
+                                         name=data[variable].name,
+                                         opacity=0.6,
+                                         xperiodalignment='middle',
+                                         )
+                                  )
                 mroi_data = data[_('Optimized Revenue')] / data[_('Optimized Spend')]
                 fig.add_trace(go.Scatter(x=data.index,
                                          y=mroi_data,
@@ -268,6 +257,7 @@ def opt_plotting_tab(dataframe):
                         text=round(text, 2),
                         showarrow=False,
                         font=dict(color='black'),
+                        yshift=10,
                         xshift=20,
                         yref='y2',
                         opacity=0.6

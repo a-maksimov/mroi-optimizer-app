@@ -1,9 +1,10 @@
 import streamlit as st
+import pandas as pd
 import plotly.graph_objects as go
 from translations import _
 from utils import create_checkbox
 import read_data
-from functions import timeseries_data_stacked, mroi_plot
+from functions import timeseries_data, mroi_plot
 
 
 def plan_plotting_tab(dataframe):
@@ -53,41 +54,101 @@ def plan_plotting_tab(dataframe):
         contribution_dim = '%'
         pct = '_pct'
 
-    # Timeseries plot
+    # Time series plot
     fig = go.Figure()
-    for numeric_variable in numeric_variables_to_plot:
+    for numeric_variable in [variable for variable in numeric_variables_to_plot
+                             if not _('Simulated').lower() in variable.lower()]:
         granularity_to_plot = sorted(granularity_to_plot,
                                      key=lambda g: dataframe[dataframe[level] == g][numeric_variable].sum(),
                                      reverse=True)
-        for granularity in granularity_to_plot:
-            timeseries = timeseries_data_stacked(dataframe, level, granularity, numeric_variable, percents=percents)
-            if timeseries is not None:
+        # https://dev.to/fronkan/stacked-and-grouped-bar-charts-using-plotly-python-a4p
+        timeseries = timeseries_data(dataframe, level, numeric_variable, percents=percents)
+        if timeseries is not None:
+            base = 0
+            for granularity in granularity_to_plot:
+                # create a new DataFrame called ts and initialize it with zeros
+                # using the same index as the timeseries DataFrame.
+                ts = pd.DataFrame(0, index=timeseries.index.unique(), columns=[numeric_variable])
+                # filter the timeseries DataFrame based on the condition `timeseries[level] == granularity`
+                # and assign the filtered values to ts.
+                ts.loc[timeseries.index[timeseries[level] == granularity], [numeric_variable]] = \
+                    timeseries.loc[timeseries[level] == granularity, [numeric_variable]]
                 if _('Spend').lower() in numeric_variable.lower():
-                    fig.add_trace(go.Bar(x=timeseries.index,
-                                         y=timeseries[timeseries[level] == granularity][numeric_variable],
+                    fig.add_trace(go.Bar(x=ts.index,
+                                         y=ts[numeric_variable],
                                          name=f'{numeric_variable}, {granularity}',
                                          opacity=0.6,
+                                         offsetgroup=0,
+                                         base=base
                                          )
                                   )
+                    base += ts[numeric_variable]
                 elif _('Revenue').lower() in numeric_variable.lower():
-                    fig.add_trace(go.Scatter(x=timeseries.index,
-                                             y=timeseries[timeseries[level] == granularity][numeric_variable],
+                    fig.add_trace(go.Scatter(x=ts.index,
+                                             y=ts[numeric_variable],
                                              name=f'{numeric_variable}, {granularity}',
                                              mode='markers+lines'
                                              )
                                   )
                 else:  # Contribution
-                    fig.add_trace(go.Scatter(x=timeseries.index,
-                                             y=timeseries[timeseries[level] == granularity][numeric_variable],
+                    fig.add_trace(go.Scatter(x=ts.index,
+                                             y=ts[numeric_variable],
                                              name=f'{numeric_variable}, {granularity}',
                                              mode='markers+lines',
                                              yaxis='y2'
                                              )
                                   )
+    # after simulation
+    if 'simulated' in st.session_state['tracking'] and st.session_state['tracking']['simulated']:
+        for numeric_variable in [variable for variable in numeric_variables_to_plot
+                                 if _('Simulated').lower() in variable.lower()]:
+            granularity_to_plot = sorted(granularity_to_plot,
+                                         key=lambda g: dataframe[dataframe[level] == g][numeric_variable].sum(),
+                                         reverse=True)
+            timeseries = timeseries_data(dataframe, level, numeric_variable, percents=percents)
+            if timeseries is not None:
+                base = 0
+                for granularity in granularity_to_plot:
+                    # create a new DataFrame called ts and initialize it with zeros
+                    # using the same index as the timeseries DataFrame.
+                    ts = pd.DataFrame(0, index=timeseries.index.unique(), columns=[numeric_variable])
+                    # filter the timeseries DataFrame based on the condition `timeseries[level] == granularity`
+                    # and assign the filtered values to ts.
+                    ts.loc[timeseries.index[timeseries[level] == granularity], [numeric_variable]] = \
+                        timeseries.loc[timeseries[level] == granularity, [numeric_variable]]
+                    if _('Spend').lower() in numeric_variable.lower():
+                        fig.add_trace(go.Bar(x=ts.index,
+                                             y=ts[numeric_variable],
+                                             name=f'{numeric_variable}, {granularity}',
+                                             opacity=0.6,
+                                             offsetgroup=1,
+                                             base=base
+                                             )
+                                      )
+                        base += ts[numeric_variable]
+                    elif _('Revenue').lower() in numeric_variable.lower():
+                        fig.add_trace(go.Scatter(x=ts.index,
+                                                 y=ts[numeric_variable],
+                                                 name=f'{numeric_variable}, {granularity}',
+                                                 mode='markers+lines'
+                                                 )
+                                      )
+                    else:  # Contribution
+                        fig.add_trace(go.Scatter(x=ts.index,
+                                                 y=ts[numeric_variable],
+                                                 name=f'{numeric_variable}, {granularity}',
+                                                 mode='markers+lines',
+                                                 yaxis='y2',
+                                                 )
+                                      )
     fig.update_layout(
-        barmode='stack',
         height=600,
         title=f'{", ".join(numeric_variables_to_plot)}',
+        xaxis=dict(
+            type='date',
+            ticklabelmode='period',
+            showgrid=True
+        ),
         xaxis_tickformatstops=[
             dict(dtickrange=[604800000, 'M1'], value='%d-%m-%Y'),
             dict(dtickrange=['M1', 'M12'], value='%m-%Y'),
@@ -96,7 +157,7 @@ def plan_plotting_tab(dataframe):
         legend=dict(
             orientation='h',
             yanchor='bottom',
-            y=-0.5,
+            y=-1,
             xanchor='right',
             x=1
         ),
@@ -105,18 +166,17 @@ def plan_plotting_tab(dataframe):
             side='left',
             tickprefix=prefix,
             ticksuffix=suffix,
-            tickformat=',.0f',
+            tickformat=',.0f'
         ),
         yaxis2=dict(
             title=dict(text=f'{_("Contribution")}, {contribution_dim}'),
             side='right',
             overlaying='y',
             tickmode='sync',
-            ticksuffix=suffix,
+            tickprefix='',
             tickformat=',.0f'
         )
     )
-    fig.update_xaxes(showgrid=True)
     st.plotly_chart(fig, use_container_width=True)
 
     # MROI plot
@@ -124,20 +184,14 @@ def plan_plotting_tab(dataframe):
     # calculate mroi data
     data = mroi_plot(dataframe, level, numeric_variables, percents=percents)
     if data is not None:
-        fig.add_trace(go.Bar(x=data.index,
-                             y=data[_('Spend') + pct],
-                             name=data[_('Spend')].name,
-                             opacity=0.6,
-                             xperiodalignment='middle',
-                             )
-                      )
-        fig.add_trace(go.Bar(x=data.index,
-                             y=data[_('Revenue Calculated') + pct],
-                             name=data[_('Revenue Calculated')].name,
-                             opacity=0.6,
-                             xperiodalignment='middle',
-                             )
-                      )
+        for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
+            fig.add_trace(go.Bar(x=data.index,
+                                 y=data[variable + pct],
+                                 name=data[variable].name,
+                                 opacity=0.6,
+                                 xperiodalignment='middle',
+                                 )
+                          )
         mroi_data = data[_('Revenue Calculated')] / data[_('Spend')]
         fig.add_trace(go.Scatter(x=data.index,
                                  y=mroi_data,
@@ -160,7 +214,8 @@ def plan_plotting_tab(dataframe):
                 text=round(text, 2),
                 showarrow=False,
                 font=dict(color='black'),
-                xshift=20,
+                yshift=10,
+                xshift=-20,
                 yref='y2',
                 opacity=0.6
 
@@ -168,20 +223,14 @@ def plan_plotting_tab(dataframe):
         if 'simulated' in st.session_state['tracking'] and st.session_state['tracking']['simulated']:
             data = mroi_plot(dataframe, level, simulated_numeric_variables, percents=percents)
             if data is not None:
-                fig.add_trace(go.Bar(x=data.index,
-                                     y=data[_('Simulated Spend') + pct],
-                                     name=data[_('Simulated Spend')].name,
-                                     opacity=0.6,
-                                     xperiodalignment='middle',
-                                     )
-                              )
-                fig.add_trace(go.Bar(x=data.index,
-                                     y=data[_('Simulated Revenue') + pct],
-                                     name=data[_('Simulated Revenue')].name,
-                                     opacity=0.6,
-                                     xperiodalignment='middle',
-                                     )
-                              )
+                for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
+                    fig.add_trace(go.Bar(x=data.index,
+                                         y=data[variable + pct],
+                                         name=data[variable].name,
+                                         opacity=0.6,
+                                         xperiodalignment='middle',
+                                         )
+                                  )
                 mroi_data = data[_('Simulated Revenue')] / data[_('Simulated Spend')]
                 fig.add_trace(go.Scatter(x=data.index,
                                          y=mroi_data,
@@ -204,6 +253,7 @@ def plan_plotting_tab(dataframe):
                         text=round(text, 2),
                         showarrow=False,
                         font=dict(color='black'),
+                        yshift=10,
                         xshift=20,
                         yref='y2',
                         opacity=0.6
