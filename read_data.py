@@ -3,7 +3,7 @@ from translations import _, translate_table
 
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
-periodicity_list = ['Yearly', 'Monthly', 'Weekly']
+periodicity_list = ['Weekly', 'Monthly', 'Yearly']
 target_products = [
     'Brand',
     'Product_1',

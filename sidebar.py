@@ -10,6 +10,23 @@ from options_menu.planning import reset_planning
 from options_menu.optimization import reset_optimization
 
 
+def handle_periodicity():
+    """ Callback function on change of periodicity multiselect """
+    # reset simulated data trigger in session state
+    reset_planning()
+
+    # update displayed value in planned budget input textbox widget
+    if 'display_planned_budget' in st.session_state['tracking']:
+        st.session_state['tracking']['display_planned_budget'] = st.session_state['tracking']['budget']
+
+    # delete optimized dataframe if it is in the session state
+    reset_optimization()
+
+    # save selected periodicity index
+    periodicity_list = [_(periodicity) for periodicity in read_data.periodicity_list]
+    st.session_state['tracking']['periodicity_track'] = periodicity_list.index(st.session_state['periodicity'])
+
+
 def multiselect_callback(key, options, by_checkbox=False):
     """
     Callback function of multiselect widgets in the sidebar.
@@ -98,22 +115,56 @@ def render_language():
                                 on_change=set_language)
 
 
-# TODO: Reset planning and optimization after date range change.
-def render_date(dataframe):
-    # date UI
-    start_date = dataframe['Date'].min()
-    end_date = dataframe['Date'].max()
+def create_date_range(selected_date_range, full_date_range, key='date_range'):
+    start_date, end_date = full_date_range
     date_range = st.sidebar.date_input(
         _('Select analysis date range'),
         min_value=start_date,
         max_value=end_date,
-        value=(start_date, end_date),
-        key='date_range'
+        value=selected_date_range,
+        key=key
     )
-    if len(date_range) == 2:
-        return date_range
-    else:
+    if len(date_range) != 2:
         st.stop()
+    else:
+        return date_range
+
+
+def render_date(dataframe):
+    # get full date range
+    # cast to datetime for comparison
+    start_date = dataframe['Date'].min().date()
+    end_date = dataframe['Date'].max().date()
+    full_date_range = start_date, end_date
+
+    # initialize date range tracking
+    if 'date_range_track' not in st.session_state['tracking']:
+        st.session_state['tracking']['date_range_track'] = full_date_range
+
+    # create initial date_range input widget
+    date_range_placeholder = st.sidebar.empty()
+    with date_range_placeholder:
+        date_range = create_date_range(st.session_state['tracking']['date_range_track'], full_date_range)
+
+    # if selected date range is different from the one that stored in session state
+    if sorted(st.session_state['tracking']['date_range_track']) != sorted(date_range):
+        # reset planning
+        reset_planning()
+        # reset optimization
+        reset_optimization()
+        # delete the old date input widget
+        del st.session_state['date_range']
+        date_range_placeholder.empty()
+        # need a rerun before the old date input gets deleted
+        st.experimental_rerun()
+        # create new date range widget with the default value from the output of the old date range input
+        # this will maintain the selected date in between re-renderings
+        date_range = create_date_range(date_range, full_date_range, key='new_date_range')
+
+        # save newly selected date range in session state
+        st.session_state['tracking']['date_range_track'] = date_range
+
+    return date_range
 
 
 def clear_all():
@@ -172,7 +223,6 @@ def create_multiselect(label, key, options):
     key (string): unique key for multiselect element
     options (list): options for the multiselect
     """
-
     # create container for multiselect
     container = st.sidebar.container()
 
@@ -215,17 +265,19 @@ def render_sidebar(dataframe):
     selection_dict = defaultdict(list)
 
     # create date range input widget
-    start_date, end_date = render_date(dataframe)
-    selection_dict.update({'Start_date': start_date, 'End_date': end_date})
+    date_range = render_date(dataframe)
+    selection_dict.update({'date_range': date_range})
 
     # TODO: reset planning and optimization on change of periodicity
     # create periodicity selection widget
+    if 'periodicity_track' not in st.session_state['tracking']:
+        st.session_state['tracking']['periodicity_track'] = 2
     periodicity = st.sidebar.selectbox(
         _('Select Periodicity'),
         options=[_(periodicity) for periodicity in read_data.periodicity_list],
-        index=0,
+        index=st.session_state['tracking']['periodicity_track'],
         key='periodicity',
-        on_change=reset_optimization
+        on_change=handle_periodicity
     )
     selection_dict['Periodicity'] = periodicity
 

@@ -28,7 +28,7 @@ def calculate_spec(dataframe, selection_dict):
     numeric_variables = [_(variable) for variable in read_data.numeric_variables]
 
     # filter dataframe dates
-    df_selection = dataframe.query('@selection_dict["Start_date"] <= Date <= @selection_dict["End_date"]')
+    df_selection = dataframe.query('@selection_dict["date_range"][0] <= Date <= @selection_dict["date_range"][1]')
 
     # filter dataframe by selected granularity levels
     for granularity_level in granularity_levels:

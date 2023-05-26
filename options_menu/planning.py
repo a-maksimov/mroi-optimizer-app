@@ -40,7 +40,7 @@ def plan_input(dataframe):
     # display_planned_budget is initialized in the calculate_plan
     input_planned_budget = st.number_input(f'{_("Enter planned budget") + ", €"}',
                                            value=st.session_state['tracking']['display_planned_budget'],
-                                           max_value=dataframe[_('Spend')].sum() * 2,
+                                           max_value=st.session_state['tracking']['display_planned_budget'] * 2,
                                            min_value=0.0,
                                            step=1000.0,
                                            key='planned_budget',

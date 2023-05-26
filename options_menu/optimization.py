@@ -141,11 +141,10 @@ def opt_page(dataframe):
     else:
         # send message on the optimization success or failure
         with success_col:
-            solver = st.session_state['tracking']['used_solver']
             if st.session_state['tracking']['success']:
-                st.success(_('Optimization successfully converged!') + f' ({solver})')
+                st.success(_('Optimization successfully converged.'))
             else:
-                st.error(_('Optimization did not converge.') + f' ({solver})')
+                st.error(_('Optimization did not converge.'))
         # access optimized top metrics calculated and saved in the session state by optimized_top_metrics() function
         # call inside calculate_opt
         optimized_total_spend = st.session_state['tracking']['optimized_spend']
@@ -177,8 +176,6 @@ def opt_page(dataframe):
     # create a tab layout
     tabs = st.tabs([_('Plotting'), _('Table')])
 
-    # TODO: Make separate figures with plots for 1) spends + contributions, 2) spends + revenues.
-    #       Make aggregated plots to compare before/after optimization.
     # define the content of the second tab: Plotting
     with tabs[0]:
         tab_plotting.opt_plotting_tab(dataframe)

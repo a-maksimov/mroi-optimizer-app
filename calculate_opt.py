@@ -36,13 +36,12 @@ def calculate_opt(dataframe):
     if not (('lower_bound_track' in st.session_state['tracking']) | (
             'upper_bound_track' in st.session_state['tracking'])):
         # sliders are in percents
-        lower_bound, upper_bound = 0.8, 1.2
-        # initialize boundary tracking
+        # initialize boundaries tracking
         st.session_state['tracking']['lower_bound_track'] = -20
         st.session_state['tracking']['upper_bound_track'] = 20
-    else:
-        lower_bound = st.session_state['tracking']['lower_bound_track']
-        upper_bound = st.session_state['tracking']['upper_bound_track']
+
+    lower_bound = st.session_state['tracking']['lower_bound_track']
+    upper_bound = st.session_state['tracking']['upper_bound_track']
 
     # calculate boundaries
     dataframe[_('Lower Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + lower_bound) / 100

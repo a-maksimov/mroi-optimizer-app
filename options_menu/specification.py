@@ -31,7 +31,6 @@ def spec_page(df_display):
     tabs = st.tabs([_('Plotting'), _('Table')])
 
     # define the content of the first tab: Plotting
-    # TODO: Make separate figures with plots for 1) spends + contributions, 2) spends + revenues.
     with tabs[0]:
         tab_plotting.spec_plotting_tab(df_display)
 

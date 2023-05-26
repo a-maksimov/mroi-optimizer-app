@@ -30,4 +30,9 @@ def menu():
 
     selected = create_menu(options=options, index=options.index(selected), key='new_menu')
 
+    if st.session_state['tracking']['language_switch']:
+        selected = _(selected, get_original=True)
+    else:
+        selected = _(selected)
+
     return selected

@@ -1,5 +1,5 @@
 from scipy.optimize import minimize
-# import nlopt
+import nlopt
 import numpy as np
 from translations import _
 
