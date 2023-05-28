@@ -190,7 +190,7 @@ def opt_plotting_tab(dataframe):
         for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
             fig.add_trace(go.Bar(x=data.index,
                                  y=data[variable + pct],
-                                 name=data[_('Simulated Spend')].name,
+                                 name=data[variable].name,
                                  opacity=0.6,
                                  xperiodalignment='middle',
                                  )

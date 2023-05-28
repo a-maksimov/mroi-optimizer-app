@@ -17,7 +17,6 @@ def reset_planning():
 def handle_plan_input():
     """
     Callback for planned budget input text widget
-    Validates input on the edit of field and if correct, saves new value to the session state
     """
     # flip trigger for simulated spend to add markers on the response curves
     st.session_state['tracking']['simulated'] = True
@@ -32,13 +31,13 @@ def handle_plan_input():
 
 
 # TODO: Make planned budget input widget more user friendly: scaling and validation.
-def plan_input(dataframe):
+def plan_input():
     """
     Input for planned budget.
     Validates user input and returns the value.
     """
     # display_planned_budget is initialized in the calculate_plan
-    input_planned_budget = st.number_input(f'{_("Enter planned budget") + ", €"}',
+    input_planned_budget = st.number_input(f'{_("Enter planned budget")}, €',
                                            value=st.session_state['tracking']['display_planned_budget'],
                                            max_value=st.session_state['tracking']['display_planned_budget'] * 2,
                                            min_value=0.0,
@@ -52,10 +51,7 @@ def plan_input(dataframe):
 # TODO: Add reset button to fallback to Specification budget.
 #  Now everything resets by user manipulations with sidebar.
 def plan_page(dataframe):
-    """
-    Renders the Planning page based on the Specification page
-    plan (tuple): a tuple of a planned budget and transformed dataframe
-    """
+    """ Renders the Planning page based on the Specification page """
     # access simulated top metrics calculated and saved in the session state by simulated_top_metrics() function
     # call inside calculate_plan
     simulated_total_contribution = st.session_state['tracking']['simulated_contribution']
@@ -65,7 +61,7 @@ def plan_page(dataframe):
     # display text input for simulated budget
     input_col, *padding = st.columns(4)
     with input_col:
-        planned_budget = plan_input(dataframe)
+        planned_budget = plan_input()
 
     # display simulated top metrics
     left_column, middle_column1, middle_column2, right_column = st.columns(4)

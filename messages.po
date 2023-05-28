@@ -266,3 +266,6 @@ msgstr "Доходы до и после оптимизации"
 
 msgid "Budget Allocation"
 msgstr "Аллокация бюджета"
+
+msgid "Enter target contribution"
+msgstr "Введите целевой вклад"

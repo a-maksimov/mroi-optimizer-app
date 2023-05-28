@@ -7,46 +7,75 @@ from options_menu.planning import plan_input
 import solvers
 
 
-def reset_optimization():
-    """ Resets optimization by deleting optimized dataframe from session state """
+def handle_goal_input():
+    """
+    Callback for planned budget input text widget
+    Validates input on the edit of field and if correct, saves new value to the session state
+    """
+    if 'display_target_contribution' in st.session_state['tracking']:
+        st.session_state['tracking']['display_target_contribution'] = st.session_state['target_contribution']
+
+    # reset optimization by deleting the optimized dataframe from session state
     if 'df_optimized' in st.session_state['tracking']:
         del st.session_state['tracking']['df_optimized']
 
 
-def optimize(dataframe, selected_solver):
+def goal_input():
+    """
+    Input for target contribution for goal based optimization.
+    """
+    input_goal = st.number_input(f'{_("Enter target contribution")}, {_("kg")}',
+                                 value=st.session_state['tracking']['display_target_contribution'],
+                                 max_value=st.session_state['tracking']['display_target_contribution'] * 2,
+                                 min_value=0.0,
+                                 step=1000.0,
+                                 key='target_contribution',
+                                 on_change=handle_goal_input)
+
+    return input_goal
+
+
+def reset_optimization():
+    """ Resets optimization """
+    if 'df_optimized' in st.session_state['tracking']:
+        del st.session_state['tracking']['df_optimized']
+    if 'spend_optimized_track' in st.session_state['tracking']:
+        st.session_state['tracking']['spend_optimized'] = False
+    if 'goal_optimized_track' in st.session_state['tracking']:
+        st.session_state['tracking']['goal_optimized'] = False
+
+
+def optimize(dataframe, optimization_type='spend', goal=None):
     """ Run Spend Based Optimization and save optimized dataframe to session state """
-    solver = solvers.solvers_dict[selected_solver]
+    # reset any optimization done before and set both optimization tracks to False
+    reset_optimization()
+    if optimization_type == 'spend':
+        st.session_state['tracking']['spend_optimized_track'] = True
+        st.session_state['tracking']['goal_optimized_track'] = False
+    else:
+        st.session_state['tracking']['spend_optimized_track'] = False
+        st.session_state['tracking']['goal_optimized_track'] = True
     # store optimized dataframe and the result of optimization convergence (boolean)
     with st.spinner(f'{_("Optimizing")}...'):
-        df_optimized, success = solver(dataframe)
+        df_optimized, success = solvers.nlopt_ld_mma(dataframe, optimization_type=optimization_type, goal=goal)
     st.session_state['tracking']['df_optimized'] = df_optimized
     st.session_state['tracking']['success'] = success
-    st.session_state['tracking']['used_solver'] = st.session_state['solver']
 
 
-def optimize_button(dataframe):
+def optimize_button(dataframe, key, goal=None):
     """ Creates button that initializes the optimization """
     # disable if no granularity has been selected in the sidebar
-    # initialize optimization on button click
     selection_dict = st.session_state['tracking']['selection_dict']
     granularity_levels = [_(level) for level in read_data.granularity_levels]
+    if key == 'spend_based_optimization_button':
+        optimization_type = 'spend'
+    else:
+        optimization_type = 'goal'
+    # initialize optimization on button click
     st.button(_('Optimize'),
-              key='optimize_button',
+              key=key,
               disabled=not any(value for key, value in selection_dict.items() if key in granularity_levels),
-              on_click=optimize, args=(dataframe, st.session_state['solver']))
-
-
-def save_solver():
-    """
-    Callback on change of solver in render_solver_select().
-    Maintain selected solver inbetween re-renderings.
-    """
-    st.session_state['tracking']['selected_solver'] = st.session_state['solver']
-
-
-def render_solver_select():
-    """ Create solver selection menu """
-    return st.selectbox(_('Select solver'), options=solvers.solvers_dict, key='solver', on_change=save_solver)
+              on_click=optimize, args=(dataframe, optimization_type, goal))
 
 
 def update_boundary(boundary):
@@ -75,21 +104,26 @@ def create_slider(label, key, boundary, value=0, min_value=0, max_value=50):
 # TODO: Add reset button and/or selects to fallback to Planned budget and/or Specification budget.
 #  Now everything resets by user manipulations with sidebar
 def opt_page(dataframe):
-    """
-    Renders the Optimization page based on the Planning page
-    df_plan: transformed dataframe
-    """
-    input_col, sliders_col, success_col, padding = st.columns(4)
+    """ Renders the Optimization page based on the Planning page """
+    spend_based_input_col, goal_based_input_col, sliders_col, padding = st.columns(4)
 
-    with input_col:
+    with spend_based_input_col:
         # display simulated budget input widget
-        planned_budget = plan_input(dataframe)
-
-        # display solver select
-        render_solver_select()
+        planned_budget = plan_input()
 
         # create optimize button
-        optimize_button(dataframe)
+        optimize_button(dataframe, key='spend_based_optimization_button')
+
+        spend_based_success_placeholder = st.empty()
+
+    with goal_based_input_col:
+        # display simulated budget input widget
+        goal = goal_input()
+
+        # create optimize button
+        optimize_button(dataframe, key='goal_based_optimization_button', goal=goal)
+
+        goal_based_success_placeholder = st.empty()
 
     if not (('lower_bound_track' in st.session_state['tracking']) | (
             'upper_bound_track' in st.session_state['tracking'])):
@@ -140,11 +174,16 @@ def opt_page(dataframe):
     # after optimization
     else:
         # send message on the optimization success or failure
-        with success_col:
-            if st.session_state['tracking']['success']:
-                st.success(_('Optimization successfully converged.'))
-            else:
-                st.error(_('Optimization did not converge.'))
+        # for spend based optimization
+        if st.session_state['tracking']['spend_optimized_track']:
+            placeholder = spend_based_success_placeholder
+        # for goal based optimization
+        else:
+            placeholder = goal_based_success_placeholder
+        if st.session_state['tracking']['success']:
+            placeholder.success(_('Optimization successfully converged.'))
+        else:
+            placeholder.error(_('Optimization did not converge.'))
         # access optimized top metrics calculated and saved in the session state by optimized_top_metrics() function
         # call inside calculate_opt
         optimized_total_spend = st.session_state['tracking']['optimized_spend']

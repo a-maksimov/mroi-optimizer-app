@@ -26,12 +26,15 @@ def simulated_top_metrics(dataframe, planned_budget):
     simulated_total_revenue = dataframe[_('Simulated Revenue')].sum()
     simulated_total_mroi = simulated_total_revenue / planned_budget
 
-    # save top metrics for Planning calculations
+    # save top metrics for Optimization calculations
     st.session_state['tracking'].update({
         'simulated_contribution': simulated_total_contribution,
         'simulated_revenue': simulated_total_revenue,
         'simulated_mroi': simulated_total_mroi
     })
+
+    # initialize the contribution value in the input form on the Optimization page
+    st.session_state['tracking']['display_target_contribution'] = st.session_state['tracking']['simulated_contribution']
 
 
 def calculate_plan(dataframe):
@@ -49,7 +52,8 @@ def calculate_plan(dataframe):
     dataframe['Multiplier'] = dataframe[_('Revenue Calculated')] / dataframe[_('Contribution')]
 
     dataframe[_('Simulated Spend')] = dataframe['Proportion'] * planned_budget
-    dataframe[_('Simulated Contribution')] = dataframe['Coefficient'] * (dataframe[_('Simulated Spend')] ** dataframe['Power'])
+    dataframe[_('Simulated Contribution')] = dataframe['Coefficient'] * (
+                dataframe[_('Simulated Spend')] ** dataframe['Power'])
     dataframe[_('Simulated Revenue')] = dataframe['Multiplier'] * dataframe[_('Simulated Contribution')]
 
     # calculate simulated top metrics and save values in session state
