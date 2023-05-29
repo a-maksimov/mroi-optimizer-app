@@ -17,18 +17,21 @@ def reset_planning():
 def handle_plan_input():
     """
     Callback for planned budget input text widget
+    Validates input on the edit of field and if correct, saves new value to the session state
     """
     # flip trigger for simulated spend to add markers on the response curves
-    st.session_state['tracking']['simulated'] = True
+    st.session_state['tracking']['simulated'] = True  
+
+    parsed_planned_budget = utils.parse_input(st.session_state['planned_budget']) 
 
     # display_planned_budget is initialized in the calculate_plan
     if 'display_planned_budget' in st.session_state['tracking']:
-        st.session_state['tracking']['display_planned_budget'] = st.session_state['planned_budget']
+        st.session_state['tracking']['display_planned_budget'] = parsed_planned_budget
 
     # reset optimization by deleting the optimized dataframe from session state
     if 'df_optimized' in st.session_state['tracking']:
         del st.session_state['tracking']['df_optimized']
-
+        
 
 # TODO: Make planned budget input widget more user friendly: scaling and validation.
 def plan_input():
@@ -37,15 +40,22 @@ def plan_input():
     Validates user input and returns the value.
     """
     # display_planned_budget is initialized in the calculate_plan
-    input_planned_budget = st.number_input(f'{_("Enter planned budget")}, €',
-                                           value=st.session_state['tracking']['display_planned_budget'],
-                                           max_value=st.session_state['tracking']['display_planned_budget'] * 2,
-                                           min_value=0.0,
-                                           step=1000.0,
-                                           key='planned_budget',
-                                           on_change=handle_plan_input)
 
-    return input_planned_budget
+    defult_value = st.session_state['tracking']['display_planned_budget']
+    defult_value = '{:.2f}'.format(defult_value)
+
+    st.text_input(f'{_("Enter planned budget") + ", €"}',
+                    value=defult_value,
+                    key='planned_budget',
+                    on_change=handle_plan_input)
+
+    defult_value = float(defult_value)
+
+    if defult_value > st.session_state['tracking']['display_planned_budget'] * 2:
+        st.error(_('Error: Number too large.'))
+        return 0
+
+    return defult_value
 
 
 # TODO: Add reset button to fallback to Specification budget.

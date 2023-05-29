@@ -12,8 +12,11 @@ def handle_goal_input():
     Callback for planned budget input text widget
     Validates input on the edit of field and if correct, saves new value to the session state
     """
+
+    parsed_input_contribution = utils.parse_input(st.session_state['target_contribution']) 
+
     if 'display_target_contribution' in st.session_state['tracking']:
-        st.session_state['tracking']['display_target_contribution'] = st.session_state['target_contribution']
+        st.session_state['tracking']['display_target_contribution'] = parsed_input_contribution
 
     # reset optimization by deleting the optimized dataframe from session state
     if 'df_optimized' in st.session_state['tracking']:
@@ -24,13 +27,20 @@ def goal_input():
     """
     Input for target contribution for goal based optimization.
     """
-    input_goal = st.number_input(f'{_("Enter target contribution")}, {_("kg")}',
-                                 value=st.session_state['tracking']['display_target_contribution'],
-                                 max_value=st.session_state['tracking']['display_target_contribution'] * 2,
-                                 min_value=0.0,
-                                 step=1000.0,
-                                 key='target_contribution',
-                                 on_change=handle_goal_input)
+    
+    input_goal = st.session_state['tracking']['display_target_contribution']
+    input_goal = '{:.2f}'.format(input_goal)
+
+    st.text_input(f'{_("Enter target contribution")}, {_("kg")}',
+                  value = input_goal,
+                  key='target_contribution',
+                  on_change=handle_goal_input)
+
+    input_goal = float(input_goal)
+
+    if input_goal > st.session_state['tracking']['display_target_contribution'] * 2:
+        st.error(_('Error: Number too large.'))
+        return 0
 
     return input_goal
 

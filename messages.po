@@ -269,3 +269,15 @@ msgstr "Аллокация бюджета"
 
 msgid "Enter target contribution"
 msgstr "Введите целевой вклад"
+
+msgid "Error: Invalid character."
+msgstr "Ошибка: Недопустимый символ."
+
+msgid "Error: Enter a number."
+msgstr "Ошибка: Введите число."
+
+msgid "Error: Invalid number."
+msgstr "Ошибка: Недопустимое число."
+
+msgid "Error: Number too large."
+msgstr "Ошибка: Слишком большое число."
