@@ -20,9 +20,9 @@ def handle_plan_input():
     Validates input on the edit of field and if correct, saves new value to the session state
     """
     # flip trigger for simulated spend to add markers on the response curves
-    st.session_state['tracking']['simulated'] = True  
+    st.session_state['tracking']['simulated'] = True
 
-    parsed_planned_budget = utils.parse_input(st.session_state['planned_budget']) 
+    parsed_planned_budget = utils.parse_input(st.session_state['planned_budget'])
 
     # display_planned_budget is initialized in the calculate_plan
     if 'display_planned_budget' in st.session_state['tracking']:
@@ -31,7 +31,7 @@ def handle_plan_input():
     # reset optimization by deleting the optimized dataframe from session state
     if 'df_optimized' in st.session_state['tracking']:
         del st.session_state['tracking']['df_optimized']
-        
+
 
 # TODO: Make planned budget input widget more user friendly: scaling and validation.
 def plan_input():
@@ -41,21 +41,21 @@ def plan_input():
     """
     # display_planned_budget is initialized in the calculate_plan
 
-    defult_value = st.session_state['tracking']['display_planned_budget']
-    defult_value = '{:.2f}'.format(defult_value)
+    default_value = st.session_state['tracking']['display_planned_budget']
+    default_value = '{:.2f}'.format(default_value)
 
     st.text_input(f'{_("Enter planned budget") + ", €"}',
-                    value=defult_value,
-                    key='planned_budget',
-                    on_change=handle_plan_input)
+                  value=default_value,
+                  key='planned_budget',
+                  on_change=handle_plan_input)
 
-    defult_value = float(defult_value)
+    default_value = float(default_value)
 
-    if defult_value > st.session_state['tracking']['display_planned_budget'] * 2:
+    if default_value > st.session_state['tracking']['display_planned_budget'] * 2:
         st.error(_('Error: Number too large.'))
         return 0
 
-    return defult_value
+    return default_value
 
 
 # TODO: Add reset button to fallback to Specification budget.
@@ -99,7 +99,7 @@ def plan_page(dataframe):
                   delta=utils.display_percent(st.session_state['tracking']['mroi'], simulated_total_mroi))
 
     # create a tab layout
-    tabs = st.tabs([ _('Plotting'), _('Response Curves'), _('Table')])
+    tabs = st.tabs([_('Plotting'), _('Response Curves'), _('Table')])
 
     # define the content of the third tab: Response Curves
     #  TODO: Guarantee colors for plots and markers (define palette)
@@ -114,5 +114,3 @@ def plan_page(dataframe):
     # define the content of the third tab: Table
     with tabs[2]:
         tab_table.plan_table_tab(dataframe)
-
-

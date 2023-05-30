@@ -6,11 +6,11 @@ from translations import _
 def display_currency(value, currency='€'):
     if value >= 1000000:
         return f'{currency} {round(value / 1e6, 2)} {_("M")}'
-    elif value >= 100000 and value <= 999999:
+    elif 100000 <= value <= 999999:
         return f'{currency} {round(value / 1e3, 2)} {_("k")}'
     else:
         return f'{currency} {round(value, 2)}'
-       
+
 
 def display_volume(value):
     if value >= 1e5:
@@ -56,56 +56,57 @@ def create_checkbox(key):
                 on_change=flip_checkbox_track,
                 args=(key,))
 
+
 def parse_input(input_text):
-    """Parse and validate input text"""
-    #replacement of possible phrases to allowed
-    possible_phrases_of_m = ["mln", "mil", "млн", "м", "М", "kk"]
-    possible_phrases_of_k = ["тыс", "к", "К"]
+    """ Parse and validate input text """
+    # replacement of possible phrases to allowed
+    possible_phrases_of_m = ['mln', 'mil', 'млн', 'млн.', 'м', 'М', 'kk']
+    possible_phrases_of_k = ['тыс', 'тыс.', 'к', 'К']
 
     for char in possible_phrases_of_m:
-        input_text = input_text.replace(char, "m")
+        input_text = input_text.replace(char, 'm')
 
     for char in possible_phrases_of_k:
-        input_text = input_text.replace(char, "k")
+        input_text = input_text.replace(char, 'k')
 
-    input_text = input_text.replace(" ", "")
-    input_text = input_text.replace(",", ".")
+    input_text = input_text.replace(" ", '')
+    input_text = input_text.replace(',', '.')
 
-    #allowed chars check
+    # allowed chars check
     allowed_phrases = set('0123456789mMKk.')
-    if set(input_text).issubset(allowed_phrases) == False:
+    if not set(input_text).issubset(allowed_phrases):
         st.error(_("Error: Invalid character."))
         return 0
 
-    #extraction of number and suffix 
-    number = ""
-    suffix = ""
+    # extraction of number and suffix
+    number = ''
+    suffix = ''
     for char in input_text:
-        if char.isdigit() or char == ".":
+        if char.isdigit() or char == '.':
             number += char
-        elif char.lower() == "k" or char.lower() == "m":
+        elif char.lower() == 'k' or char.lower() == 'm':
             suffix += char.lower()
 
-    #check if number exist
+    # check if number exist
     if not number:
         st.error(_('Error: Enter a number.'))
         return 0
 
-    #float number transformation
+    # float number transformation
     try:
         amount = float(number)
     except ValueError:
         st.error(_('Error: Invalid number.'))
         return 0
 
-    #transformation suffix to multiplier
+    # transformation suffix to multiplier
     multiplier = 1
-    if "k" in suffix:
-        multiplier *= 1e3 ** suffix.count("k")
-    if "m" in suffix:
-        multiplier *= 1e6 ** suffix.count("m")
+    if 'k' in suffix:
+        multiplier *= 1e3 ** suffix.count('k')
+    if 'm' in suffix:
+        multiplier *= 1e6 ** suffix.count('m')
 
-    #calculation
+    # calculation
     euro_amount = amount * multiplier
 
     return euro_amount
