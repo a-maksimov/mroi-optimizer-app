@@ -4,6 +4,8 @@ from translations import _
 
 def get_target_contribution():
     # display_target_contribution is initialized in the session state after this
+    if 'target_contribution' in st.session_state:
+        st.session_state['tracking']['display_target_contribution'] = st.session_state['target_contribution']
     if 'display_target_contribution' in st.session_state['tracking']:
         target_contribution = st.session_state['tracking']['display_target_contribution']
     # use simulated contribution
