@@ -148,6 +148,8 @@ def render_date(dataframe):
 
     # if selected date range is different from the one that stored in session state
     if sorted(st.session_state['tracking']['date_range_track']) != sorted(date_range):
+        # save newly selected date range in session state
+        st.session_state['tracking']['date_range_track'] = date_range
         # reset planning
         reset_planning()
         # reset optimization
@@ -160,9 +162,6 @@ def render_date(dataframe):
         # create new date range widget with the default value from the output of the old date range input
         # this will maintain the selected date in between re-renderings
         date_range = create_date_range(date_range, full_date_range, key='new_date_range')
-
-        # save newly selected date range in session state
-        st.session_state['tracking']['date_range_track'] = date_range
 
     return date_range
 

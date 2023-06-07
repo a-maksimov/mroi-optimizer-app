@@ -1,14 +1,18 @@
 import streamlit as st
+
+import utils
 from translations import _
 
 
 def get_planned_budget():
     # display_planned_budget is initialized in the session state after this
-    if 'display_planned_budget' in st.session_state['tracking']:
+    if 'simulated' in st.session_state['tracking'] and not st.session_state['tracking']['simulated']:
+        planned_budget = st.session_state['tracking']['budget']
+    elif 'display_planned_budget' in st.session_state['tracking']:
         planned_budget = st.session_state['tracking']['display_planned_budget']
     # planned_budget is the key of the text input that is rendered on the Planning page
     elif 'planned_budget' in st.session_state:
-        planned_budget = float(st.session_state['planned_budget'])
+        planned_budget = utils.parse_input(st.session_state['planned_budget'])
     # otherwise just use the current budget from the Specification page
     else:
         planned_budget = st.session_state['tracking']['budget']
