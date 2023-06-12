@@ -13,7 +13,7 @@ def handle_goal_input():
     Validates input on the edit of field and if correct, saves new value to the session state
     """
 
-    parsed_input_contribution = utils.parse_input(st.session_state['target_contribution']) 
+    parsed_input_contribution = utils.parse_input(st.session_state['target_contribution'])
 
     if 'display_target_contribution' in st.session_state['tracking']:
         st.session_state['tracking']['display_target_contribution'] = parsed_input_contribution
@@ -27,12 +27,12 @@ def goal_input():
     """
     Input for target contribution for goal based optimization.
     """
-    
+    # 'display target contribution' is initialized in calculate_opt
     input_goal = st.session_state['tracking']['display_target_contribution']
     input_goal = '{:.2f}'.format(input_goal)
 
     st.text_input(f'{_("Enter target contribution")}, {_("kg")}',
-                  value = input_goal,
+                  value=input_goal,
                   key='target_contribution',
                   on_change=handle_goal_input)
 
@@ -55,7 +55,7 @@ def reset_optimization():
         st.session_state['tracking']['goal_optimized'] = False
 
 
-def optimize(dataframe, optimization_type='spend', goal=None):
+def optimize(dataframe, optimization_type, goal):
     """ Run Spend Based Optimization and save optimized dataframe to session state """
     # reset any optimization done before and set both optimization tracks to False
     reset_optimization()
@@ -72,12 +72,12 @@ def optimize(dataframe, optimization_type='spend', goal=None):
     st.session_state['tracking']['success'] = success
 
 
-def optimize_button(dataframe, key, goal=None):
+def optimize_button(dataframe, scenario, goal, key):
     """ Creates button that initializes the optimization """
     # disable if no granularity has been selected in the sidebar
     selection_dict = st.session_state['tracking']['selection_dict']
     granularity_levels = [_(level) for level in read_data.granularity_levels]
-    if key == 'spend_based_optimization_button':
+    if scenario == _('Spend Based Optimization'):
         optimization_type = 'spend'
     else:
         optimization_type = 'goal'
@@ -111,29 +111,51 @@ def create_slider(label, key, boundary, value=0, min_value=0, max_value=50):
                      args=(boundary,))
 
 
+def select_scenario():
+    """ Callback function for select optimization scenario """
+    st.session_state['tracking']['select_scenario_track'] = st.session_state['select_scenario']
+
+
+def render_select_scenario():
+    # optimization scenario select UI
+    # set the default value after re-render of widget
+    # 'select_scenario' value changes after set_scenario() callback
+    scenarios = [_('Spend Based Optimization'), _('Goal Based Optimization')]
+    if 'select_scenario_track' not in st.session_state['tracking']:
+        st.session_state['tracking']['select_scenario_track'] = scenarios[0]
+    # set up the translation selection
+    return st.selectbox(_('Select optimization scenario'),
+                        index=scenarios.index(st.session_state['tracking']['select_scenario_track']),
+                        options=scenarios,
+                        key='select_scenario',
+                        on_change=select_scenario)
+
+
 # TODO: Add reset button and/or selects to fallback to Planned budget and/or Specification budget.
 #  Now everything resets by user manipulations with sidebar
 def opt_page(dataframe):
     """ Renders the Optimization page based on the Planning page """
-    spend_based_input_col, goal_based_input_col, sliders_col, padding = st.columns(4)
+    optimize_col, input_col, sliders_col, padding = st.columns(4)
 
-    with spend_based_input_col:
-        # display simulated budget input widget
-        planned_budget = plan_input()
+    with optimize_col:
+        # display select optimization scenario
+        scenario = render_select_scenario()
+        optimize_button_placeholder = st.empty()
+        success_placeholder = st.empty()
 
+    with input_col:
+        if scenario == _('Spend Based Optimization'):
+            # display simulated budget input widget
+            goal = plan_input()
+        else:
+            # display simulated budget input widget
+            goal = goal_input()
+
+    planned_budget = st.session_state['tracking']['display_planned_budget']
+
+    with optimize_button_placeholder:
         # create optimize button
-        optimize_button(dataframe, key='spend_based_optimization_button')
-
-        spend_based_success_placeholder = st.empty()
-
-    with goal_based_input_col:
-        # display simulated budget input widget
-        goal = goal_input()
-
-        # create optimize button
-        optimize_button(dataframe, key='goal_based_optimization_button', goal=goal)
-
-        goal_based_success_placeholder = st.empty()
+        optimize_button(dataframe, scenario, goal, key='optimization_button')
 
     if not (('lower_bound_track' in st.session_state['tracking']) | (
             'upper_bound_track' in st.session_state['tracking'])):
@@ -184,16 +206,12 @@ def opt_page(dataframe):
     # after optimization
     else:
         # send message on the optimization success or failure
-        # for spend based optimization
-        if st.session_state['tracking']['spend_optimized_track']:
-            placeholder = spend_based_success_placeholder
-        # for goal based optimization
-        else:
-            placeholder = goal_based_success_placeholder
-        if st.session_state['tracking']['success']:
-            placeholder.success(_('Optimization successfully converged.'))
-        else:
-            placeholder.error(_('Optimization did not converge.'))
+        opt_string = st.session_state['tracking']['select_scenario_track']
+        with success_placeholder:
+            if st.session_state['tracking']['success']:
+                st.success(f'{opt_string} {_("successfully converged.")}')
+            else:
+                st.error(f'{opt_string} {_("did not converge to the desired criteria.")}')
         # access optimized top metrics calculated and saved in the session state by optimized_top_metrics() function
         # call inside calculate_opt
         optimized_total_spend = st.session_state['tracking']['optimized_spend']

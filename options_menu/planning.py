@@ -40,7 +40,6 @@ def plan_input():
     Validates user input and returns the value.
     """
     # display_planned_budget is initialized in the calculate_plan
-
     default_value = st.session_state['tracking']['display_planned_budget']
     default_value = '{:.2f}'.format(default_value)
 

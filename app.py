@@ -38,7 +38,7 @@ if selected == _('Specification'):
         specification.spec_page(
             calculate_spec(df, selection_dict))
 
-if selected == _('Planning'):
+if selected == _('Analyze'):
     with st.spinner(f'{_("Loading")}...'):
         planning.plan_page(
             calculate_plan(

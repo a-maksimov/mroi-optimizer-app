@@ -99,6 +99,9 @@ msgstr "Спецификация"
 msgid "Planning"
 msgstr "Планирование"
 
+msgid "Analyze"
+msgstr "Анализ"
+
 msgid "Optimization"
 msgstr "Оптимизация"
 
@@ -183,6 +186,9 @@ msgstr "Введите планируемый бюджет"
 msgid "Simulated Spend"
 msgstr "Смоделированный расход"
 
+msgid "Select optimization scenario"
+msgstr "Выберите сценарий оптимизации"
+
 msgid "Simulated Budget"
 msgstr "Моделируемый бюджет"
 
@@ -249,12 +255,6 @@ msgstr "Верхний предел расходов"
 msgid "Invalid currency amount. Please enter a valid number."
 msgstr "Неверное значение валюты. Пожалуйста, введите правильное число."
 
-msgid "Optimization successfully converged."
-msgstr "Оптимизация успешно завершена."
-
-msgid "Optimization didn't converge to the desire criteria."
-msgstr "Оптимизация не сошлась к заданным критериям."
-
 msgid "Percents"
 msgstr "Проценты"
 
@@ -281,3 +281,15 @@ msgstr "Ошибка: Недопустимое число."
 
 msgid "Error: Number too large."
 msgstr "Ошибка: Слишком большое число."
+
+msgid "Spend Based Optimization"
+msgstr "Оптимизация бюджета"
+
+msgid "Goal Based Optimization"
+msgstr "Целевая оптимизация"
+
+msgid "successfully converged."
+msgstr "успешно завершена."
+
+msgid "didn't converge to the desired criteria."
+msgstr "не сошлась к заданным критериям."

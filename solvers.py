@@ -64,7 +64,7 @@ def slsqp(dataframe, goal, optimization_type='spend'):
     return dataframe, res.success
 
 
-def nlopt_ld_mma(dataframe, optimization_type='spend', goal=None):
+def nlopt_ld_mma(dataframe, optimization_type, goal):
     """
     Takes constraint, boundaries, gradient
     :param dataframe: input dataframe
@@ -72,6 +72,7 @@ def nlopt_ld_mma(dataframe, optimization_type='spend', goal=None):
     :param optimization_type: either 'spend' or 'goal'
     :return: optimized dataframe
     """
+
     # define objective function
     def eval_f(x, grad):
         objective = -np.sum(dataframe[_('Coefficient')] * np.power(x, dataframe['Power']))
@@ -79,13 +80,10 @@ def nlopt_ld_mma(dataframe, optimization_type='spend', goal=None):
             grad[:] = -dataframe[_('Coefficient')] * dataframe['Power'] * np.power(x, dataframe['Power'] - 1)
         return objective
 
-    # define constraint
-    budget = dataframe[_('Simulated Spend')].sum()
-
     def eval_g(x, grad):
         # spend based optimization
         if optimization_type == 'spend':
-            constraint = np.sum(x) - budget
+            constraint = np.sum(x) - goal
         # goal based optimization
         else:
             contribution = np.sum(dataframe[_('Coefficient')] * np.power(x, dataframe['Power']))

@@ -7,7 +7,7 @@ def create_menu(options, index=1, key='menu'):
     selected = option_menu(
         menu_title=None,
         options=options,
-        icons=['question-circle', 'bar-chart-fill', 'graph-up', 'sliders'],
+        icons=['question-circle', 'gear', 'clipboard-data', 'sliders'],
         menu_icon='cast',
         default_index=index,
         orientation='horizontal',
@@ -18,7 +18,7 @@ def create_menu(options, index=1, key='menu'):
 
 def menu():
     """ Creates horizontal menu. """
-    options = [_('About'), _('Specification'), _('Planning'), _('Optimization')]
+    options = [_('About'), _('Specification'), _('Analyze'), _('Optimization')]
     # create placeholder for options menu to be able to delete it later
     menu_placeholder = st.empty()
     with menu_placeholder:
