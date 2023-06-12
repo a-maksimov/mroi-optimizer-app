@@ -16,11 +16,11 @@ def spec_page(df_display):
     # render top metrics
     left_column, middle_column1, middle_column2, right_column = st.columns(4)
     with left_column:
-        st.metric(_('Total budget'), value=utils.display_currency(total_spend))
+        st.metric(_('Total Budget'), value=utils.display_currency(total_spend))
     with middle_column1:
-        st.metric(_('Total contribution'), value=utils.display_volume(total_contribution))
+        st.metric(_('Total Contribution'), value=utils.display_volume(total_contribution))
     with middle_column2:
-        st.metric(_('Total calculated revenue'), value=utils.display_currency(total_revenue))
+        st.metric(_('Total Calculated Revenue'), value=utils.display_currency(total_revenue))
     with right_column:
         st.metric('MROI', value=f'{round(total_mroi, 2)}')
 

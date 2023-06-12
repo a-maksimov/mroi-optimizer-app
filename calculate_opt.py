@@ -1,12 +1,14 @@
 import streamlit as st
 from translations import _
+import read_data
 import utils
 
 
 def get_target_contribution():
     # display_target_contribution is initialized in the session state after this
     if 'target_contribution' in st.session_state:
-        st.session_state['tracking']['display_target_contribution'] = utils.parse_input(st.session_state['target_contribution'])
+        st.session_state['tracking']['display_target_contribution'] = utils.parse_input(
+            st.session_state['target_contribution'])
     if 'display_target_contribution' in st.session_state['tracking']:
         target_contribution = st.session_state['tracking']['display_target_contribution']
     # use simulated contribution
@@ -58,19 +60,46 @@ def calculate_opt(dataframe):
         dataframe = st.session_state['tracking']['df_optimized']
         optimized_top_metrics(dataframe)
 
-    # calculate initial boundaries
-    if not (('lower_bound_track' in st.session_state['tracking']) | (
-            'upper_bound_track' in st.session_state['tracking'])):
-        # sliders are in percents
-        # initialize boundaries tracking
-        st.session_state['tracking']['lower_bound_track'] = -20
-        st.session_state['tracking']['upper_bound_track'] = 20
-
-    lower_bound = st.session_state['tracking']['lower_bound_track']
-    upper_bound = st.session_state['tracking']['upper_bound_track']
-
     # calculate boundaries
-    dataframe[_('Lower Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + lower_bound) / 100
-    dataframe[_('Upper Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + upper_bound) / 100
+    if 'slider_values' not in st.session_state['tracking']:
+        st.session_state['tracking']['slider_values'] = dict()
+    # 'select_boundary_variable_track' exists after select boundary variable renders in Optimization page
+    # calculate default boundaries
+    if 'select_boundary_variable_track' not in st.session_state['tracking']:
+        lower_bound = -20
+        upper_bound = 20
+        dataframe[_('Lower Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + lower_bound) / 100
+        dataframe[_('Upper Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + upper_bound) / 100
+
+    # calculate total boundaries
+    elif st.session_state['tracking']['select_boundary_variable_track'] == _('Total Spend'):
+        if _('Total Spend') not in st.session_state['tracking']['slider_values']:
+            st.session_state['tracking']['slider_values'][_('Total Spend')] = {'lower': -20, 'upper': 20}
+        lower_bound = st.session_state['tracking']['slider_values'][_('Total Spend')]['lower']
+        upper_bound = st.session_state['tracking']['slider_values'][_('Total Spend')]['upper']
+
+        dataframe[_('Lower Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + lower_bound) / 100
+        dataframe[_('Upper Spend Bound')] = dataframe[_('Simulated Spend')] * (100 + upper_bound) / 100
+
+    # calculate variables' boundaries
+    else:
+        # get selection dict
+        selection_dict = st.session_state['tracking']['selection_dict']
+        # get granularity level
+        level = [_(level) for level in read_data.granularity_levels if _(level) in dataframe.columns].pop()
+        # get granularity variables
+        variables = selection_dict[level]
+        for variable in variables:
+            # set default slider values for variables
+            if variable not in st.session_state['tracking']['slider_values']:
+                st.session_state['tracking']['slider_values'][variable] = {'lower': -20, 'upper': 20}
+
+            lower_bound = st.session_state['tracking']['slider_values'][variable]['lower']
+            upper_bound = st.session_state['tracking']['slider_values'][variable]['upper']
+
+            dataframe.loc[dataframe[level] == variable, _('Lower Spend Bound')] = \
+                dataframe.loc[dataframe[level] == variable, _('Simulated Spend')] * (100 + lower_bound) / 100
+            dataframe.loc[dataframe[level] == variable, _('Upper Spend Bound')] = \
+                dataframe.loc[dataframe[level] == variable, _('Simulated Spend')] * (100 + upper_bound) / 100
 
     return dataframe

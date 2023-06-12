@@ -272,7 +272,7 @@ def render_sidebar(dataframe):
     if 'periodicity_track' not in st.session_state['tracking']:
         st.session_state['tracking']['periodicity_track'] = 2
     periodicity = st.sidebar.selectbox(
-        _('Select Periodicity'),
+        _('Select periodicity'),
         options=[_(periodicity) for periodicity in read_data.periodicity_list],
         index=st.session_state['tracking']['periodicity_track'],
         key='periodicity',

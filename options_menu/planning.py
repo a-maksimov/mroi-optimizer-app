@@ -98,7 +98,7 @@ def plan_page(dataframe):
                   delta=utils.display_percent(st.session_state['tracking']['mroi'], simulated_total_mroi))
 
     # create a tab layout
-    tabs = st.tabs([_('Plotting'), _('Response Curves'), _('Table')])
+    tabs = st.tabs([_('Plotting'), _('Response curves'), _('Table')])
 
     # define the content of the third tab: Response Curves
     #  TODO: Guarantee colors for plots and markers (define palette)

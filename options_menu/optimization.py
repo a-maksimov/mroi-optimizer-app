@@ -12,7 +12,6 @@ def handle_goal_input():
     Callback for planned budget input text widget
     Validates input on the edit of field and if correct, saves new value to the session state
     """
-
     parsed_input_contribution = utils.parse_input(st.session_state['target_contribution'])
 
     if 'display_target_contribution' in st.session_state['tracking']:
@@ -56,7 +55,7 @@ def reset_optimization():
 
 
 def optimize(dataframe, optimization_type, goal):
-    """ Run Spend Based Optimization and save optimized dataframe to session state """
+    """ Run Spend based optimization and save optimized dataframe to session state """
     # reset any optimization done before and set both optimization tracks to False
     reset_optimization()
     if optimization_type == 'spend':
@@ -67,7 +66,7 @@ def optimize(dataframe, optimization_type, goal):
         st.session_state['tracking']['goal_optimized_track'] = True
     # store optimized dataframe and the result of optimization convergence (boolean)
     with st.spinner(f'{_("Optimizing")}...'):
-        df_optimized, success = solvers.nlopt_ld_mma(dataframe, optimization_type=optimization_type, goal=goal)
+        df_optimized, success = solvers.nlopt_ld_mma(dataframe, optimization_type, goal)
     st.session_state['tracking']['df_optimized'] = df_optimized
     st.session_state['tracking']['success'] = success
 
@@ -77,7 +76,7 @@ def optimize_button(dataframe, scenario, goal, key):
     # disable if no granularity has been selected in the sidebar
     selection_dict = st.session_state['tracking']['selection_dict']
     granularity_levels = [_(level) for level in read_data.granularity_levels]
-    if scenario == _('Spend Based Optimization'):
+    if scenario == _('Spend based optimization'):
         optimization_type = 'spend'
     else:
         optimization_type = 'goal'
@@ -88,16 +87,16 @@ def optimize_button(dataframe, scenario, goal, key):
               on_click=optimize, args=(dataframe, optimization_type, goal))
 
 
-def update_boundary(boundary):
+def update_boundary(variable, slider_key, boundary):
     """
     Callback on change of upper/lower boundary slider.
     Saves the value of the boundary in between re-renders.
     """
-    st.session_state['tracking'][boundary + '_bound_track'] = st.session_state[boundary + '_bound_slider']
+    st.session_state['tracking']['slider_values'][variable][boundary] = st.session_state[slider_key]
 
 
 # TODO: Show warning when boundaries set outside +/- 30% of current spends.
-def create_slider(label, key, boundary, value=0, min_value=0, max_value=50):
+def create_slider(variable, label, key, boundary, value=0, min_value=0, max_value=50):
     """
     Create Lower bound and Upper bound sliders.
     On slider change the function update_boundary() is called.
@@ -108,7 +107,7 @@ def create_slider(label, key, boundary, value=0, min_value=0, max_value=50):
                      min_value=min_value,
                      max_value=max_value,
                      on_change=update_boundary,
-                     args=(boundary,))
+                     args=(variable, key, boundary))
 
 
 def select_scenario():
@@ -120,7 +119,7 @@ def render_select_scenario():
     # optimization scenario select UI
     # set the default value after re-render of widget
     # 'select_scenario' value changes after set_scenario() callback
-    scenarios = [_('Spend Based Optimization'), _('Goal Based Optimization')]
+    scenarios = [_('Spend based optimization'), _('Goal based optimization')]
     if 'select_scenario_track' not in st.session_state['tracking']:
         st.session_state['tracking']['select_scenario_track'] = scenarios[0]
     # set up the translation selection
@@ -131,25 +130,69 @@ def render_select_scenario():
                         on_change=select_scenario)
 
 
+def select_boundary_variable():
+    """ Callback function for select variable for boundary setting """
+    variable = st.session_state['select_boundary_variable']
+    st.session_state['tracking']['select_boundary_variable_track'] = variable
+
+
+def render_select_variable():
+    # variable select for boundaries setting UI
+    # disable if no granularity has been selected in the sidebar
+    selection_dict = st.session_state['tracking']['selection_dict']
+    granularity_levels = [_(level) for level in read_data.granularity_levels]
+    # check if user has selected any granularity in sidebar
+    # iterate backwards through the granularity levels and use the first one that is not empty
+    for level in reversed(granularity_levels):
+        if selection_dict[level]:
+            granularity_options = selection_dict[level]
+            break
+    # the else block will NOT be executed if the loop is stopped by a break statement
+    else:
+        granularity_options = []
+
+    variables = [_('Total Spend')] + granularity_options
+
+    for variable in variables:
+        if variable not in st.session_state['tracking']['slider_values']:
+            st.session_state['tracking']['slider_values'][variable] = {'lower': -20, 'upper': 20}
+
+    if 'select_boundary_variable_track' not in st.session_state['tracking']:
+        st.session_state['tracking']['select_boundary_variable_track'] = variables[0]
+    # set up the translation selection
+    return st.selectbox(_('Select variable for spend boundaries setting'),
+                        index=variables.index(st.session_state['tracking']['select_boundary_variable_track']),
+                        options=variables,
+                        key='select_boundary_variable',
+                        on_change=select_boundary_variable,
+                        disabled=not any(value for key, value in selection_dict.items() if key in granularity_levels))
+
+
 # TODO: Add reset button and/or selects to fallback to Planned budget and/or Specification budget.
 #  Now everything resets by user manipulations with sidebar
 def opt_page(dataframe):
     """ Renders the Optimization page based on the Planning page """
-    optimize_col, input_col, sliders_col, padding = st.columns(4)
+    optimize_col, input_col, sliders_col, success_col = st.columns(4)
 
     with optimize_col:
         # display select optimization scenario
         scenario = render_select_scenario()
         optimize_button_placeholder = st.empty()
-        success_placeholder = st.empty()
 
     with input_col:
-        if scenario == _('Spend Based Optimization'):
+        if scenario == _('Spend based optimization'):
             # display simulated budget input widget
             goal = plan_input()
         else:
             # display simulated budget input widget
             goal = goal_input()
+
+        # display variable selection widget for setting boundaries
+        selected_variable = render_select_variable()
+
+    # create placeholder for messages
+    with success_col:
+        success_placeholder = st.empty()
 
     planned_budget = st.session_state['tracking']['display_planned_budget']
 
@@ -157,28 +200,27 @@ def opt_page(dataframe):
         # create optimize button
         optimize_button(dataframe, scenario, goal, key='optimization_button')
 
-    if not (('lower_bound_track' in st.session_state['tracking']) | (
-            'upper_bound_track' in st.session_state['tracking'])):
-        lower_bound, upper_bound = -20, 20
-    else:
-        lower_bound = st.session_state['tracking']['lower_bound_track']
-        upper_bound = st.session_state['tracking']['upper_bound_track']
-
-    # display boundary sliders
     with sliders_col:
-        create_slider(f'{_("Allowed decrease in spends")}, %',
+        # get boundaries for selected variable
+        lower_bound = st.session_state['tracking']['slider_values'][selected_variable]['lower']
+        upper_bound = st.session_state['tracking']['slider_values'][selected_variable]['upper']
+
+        # display boundary sliders
+        create_slider(selected_variable,
+                      label=f'{_("Allowed decrease in spends")} {_("for variable")} {selected_variable}, %',
                       value=lower_bound,
                       boundary='lower',
                       min_value=-50,
                       max_value=0,
-                      key='lower_bound_slider')
+                      key=selected_variable + '_lower_bound_slider')
 
-        create_slider(f'{_("Allowed increase in spends")}, %',
+        create_slider(selected_variable,
+                      label=f'{_("Allowed increase in spends")} {_("for variable")} {selected_variable}, %',
                       value=upper_bound,
                       boundary='upper',
                       min_value=0,
                       max_value=50,
-                      key='upper_bound_slider')
+                      key=selected_variable + '_upper_bound_slider')
 
     # display simulated top metrics
     left_column, middle_column1, middle_column2, right_column = st.columns(4)

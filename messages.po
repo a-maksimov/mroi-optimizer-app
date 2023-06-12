@@ -42,6 +42,9 @@ msgstr "Год"
 msgid "Select analysis date range"
 msgstr "Выберите временной интервал анализа"
 
+msgid "for variable"
+msgstr "для переменной"
+
 msgid "Select all"
 msgstr "Выбрать все"
 
@@ -51,7 +54,7 @@ msgstr "Очистить все"
 msgid "User inputs"
 msgstr "Пользовательский ввод"
 
-msgid "Select Periodicity"
+msgid "Select periodicity"
 msgstr "Выберите периодичность"
 
 msgid "Select granularity level"
@@ -72,13 +75,13 @@ msgstr "Выберите медиа-форматы"
 msgid "Select products"
 msgstr "Выберите рекламные кампании"
 
-msgid "Total budget"
+msgid "Total Budget"
 msgstr "Общий бюджет"
 
-msgid "Total contribution"
+msgid "Total Contribution"
 msgstr "Общий вклад"
 
-msgid "Total calculated revenue"
+msgid "Total Calculated Revenue"
 msgstr "Общий рассчитанный доход"
 
 msgid "Table"
@@ -201,7 +204,7 @@ msgstr "Смоделированный доход"
 msgid "This specification is impossible. Pick a new one."
 msgstr "Эта спецификация невозможна. Выберите спецификацию заново."
 
-msgid "Response Curves"
+msgid "Response curves"
 msgstr "Кривые насыщения"
 
 msgid "Factual Spend"
@@ -252,6 +255,9 @@ msgstr "Нижний предел расходов"
 msgid "Upper Spend Bound"
 msgstr "Верхний предел расходов"
 
+msgid "Select variable for spend boundaries setting"
+msgstr "Выберите переменную для установки пределов изменения расходов"
+
 msgid "Invalid currency amount. Please enter a valid number."
 msgstr "Неверное значение валюты. Пожалуйста, введите правильное число."
 
@@ -264,7 +270,7 @@ msgstr "Расходы до и после оптимизации"
 msgid "Revenues before and after optimization"
 msgstr "Доходы до и после оптимизации"
 
-msgid "Budget Allocation"
+msgid "Budget allocation"
 msgstr "Аллокация бюджета"
 
 msgid "Enter target contribution"
@@ -282,10 +288,10 @@ msgstr "Ошибка: Недопустимое число."
 msgid "Error: Number too large."
 msgstr "Ошибка: Слишком большое число."
 
-msgid "Spend Based Optimization"
+msgid "Spend based optimization"
 msgstr "Оптимизация бюджета"
 
-msgid "Goal Based Optimization"
+msgid "Goal based optimization"
 msgstr "Целевая оптимизация"
 
 msgid "successfully converged."
@@ -293,3 +299,6 @@ msgstr "успешно завершена."
 
 msgid "didn't converge to the desired criteria."
 msgstr "не сошлась к заданным критериям."
+
+msgid "Total Spend"
+msgstr "Общий расход"
