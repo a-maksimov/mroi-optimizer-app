@@ -18,37 +18,22 @@ def plan_plotting_tab(dataframe):
     simulated_numeric_variables = [variable for variable in simulated_numeric_variables
                                    if variable in dataframe.columns]
 
-    base_colors_timeseries=['#eb6e21','#f7db05','#d62b2b','#1e3ac7','#13bd21','#7308c4','#d936c6']
+    #color's sequence: peach, teal, red, ice, tealgrn, violet, pink
+    colors_contribution=['#F8BF97','#9DD4D4','#EC939D','#63A9C7','#85E6AB', '#E0C2F0', '#ECAABF']
+    colors_spend=['#F6A479', '#78B9C1', '#D87187', '#4175B5', '#61D7A5', '#C7A5E3', '#D682B5']
+    colors_revenue=['#F28A61','#5799AC','#B74F72','#3C488F','#42BDA3', '#AC8DD5', '#B263AE']
 
-    colors_contribution=['#F7A15B','#FFEC5E','#F76F6F','#8554F7','#4AF77B', '#C64AF7', '#F763F7']
-    colors_spend=['#C25F0E', '#EBD110', '#C21D1D', '#4008C2', '#00C237', '#8B00C2', '#C213C2']
-    colors_revenue=['#F57811','#F5F231','#F52525','#5109F4','#00F545', '#B000F5', '#F518F5']
+    colors_revenue_optimization=['#EB4C41', '#2B5876', '#6E2348', '#191934', '#268199', '#675BA3', '#623F8E']
+    colors_spend_optimization=['#EF6F4F', '#3B7490', '#96375E', '#2E2C5B', '#32A5A1', '#8D75C2', '#8E50A4']
+    colors_contribution_optimization=['#FCDCBF', '#C9EAE7', '#FBBBBB', '#C2E6E9', '#A9F0B9', '#F1DDF7', '#F8D9D8']
 
-    colors_optimization=['#ff8317', '#fcf40d', '#fc1e2d', '#1938fc', '#19fa19', '#7611f2', '#fc17e5']
-
-    colors_revenue_optimization=['#DB6B0F', '#FFE312', '#DB2121', '#760CF5', '#00DB3E', '#9D00DB', '#DB16DB']
-    colors_spend_optimization=['#B5580D', '#CCB60E', '#B51B1B', '#260575', '#00B533', '#540075', '#750C75']
-    colors_contribution_optimization=['#FA825D', '#FFDA65', '#F76266', '#BA9FF9', '#95F9B1', '#DC95F9', '#F9AEF9']
-
-
-    spend_colors_mroi_list=[]
-    revenue_colors_mroi_list=[] 
-    contribution_colors_mroi_list=[]
-    optimization_contribution_colors_mroi_list=[]
-    optimization_revenue_colors_mroi_list=[]
-    optimization_spend_colors_mroi_list=[]
-    mroi_color_list=[]
-    optimization_mroi_color_list=[]
-
-    granularity_colors ={}
     contribution_colors ={}
     spend_colors ={}
     revenue_colors ={}
-    optimization_colors={}
+ 
     contribution_optimization_colors={}
     spend_optimization_colors={}
     revenue_optimization_colors={}
-    mroi_colors={}
 
     # check if user has selected any granularity in sidebar
     # iterate backwards through the granularity levels and use the first one that is not empty
@@ -87,13 +72,141 @@ def plan_plotting_tab(dataframe):
         pct = '_pct'
 
     for i in range(len(granularity_to_plot)):
-        granularity_colors[granularity_to_plot[i]] = base_colors_timeseries[i]
         contribution_colors[granularity_to_plot[i]] = colors_contribution[i]
         spend_colors[granularity_to_plot[i]] = colors_spend[i]
         revenue_colors[granularity_to_plot[i]] = colors_revenue[i]
         revenue_optimization_colors[granularity_to_plot[i]]=colors_revenue_optimization[i]
         spend_optimization_colors[granularity_to_plot[i]]=colors_spend_optimization[i]
         contribution_optimization_colors[granularity_to_plot[i]]=colors_contribution_optimization[i]
+
+    # MROI plot
+    fig = go.Figure()
+    # calculate mroi data
+    labels_for_colors=['#0068C9','lightskyblue','deepskyblue']
+    labels_for_opt_colors=['darkcyan','darkturquoise','cyan']
+    dict_for_colors={}
+    dict_for_opt_colors={}
+    data = mroi_plot(dataframe, level, numeric_variables, percents=percents)
+    if data is not None:
+        k=0
+        for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
+            dict_for_colors[variable] = labels_for_colors[k]
+            k=k+1
+
+        for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
+            fig.add_trace(go.Bar(x=data.index,
+                                 y=data[variable + pct],
+                                 name=data[variable].name,
+                                 opacity=0.6,
+                                 xperiodalignment='middle',
+                                 marker_color=dict_for_colors[variable]
+                                 )
+                          )
+        mroi_data = data[_('Revenue Calculated')] / data[_('Spend')]
+        # for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
+        fig.add_trace(go.Scatter(x=data.index,
+                                    y=mroi_data,
+                                    name='MROI',
+                                    xperiodalignment='middle',
+                                    mode='markers',
+                                    marker=dict(
+                                        size=10,
+                                        color='red'
+                                    ),
+                                    yaxis='y2',
+                                    text=mroi_data,  # Include Y values in marker text
+                                    textposition='bottom center'
+                                    )
+                        )
+        # add annotations for each mroi marker
+        for x, y, text in zip(data.index, mroi_data, mroi_data):
+            fig.add_annotation(
+                x=x,
+                y=y,
+                text=round(text, 2),
+                showarrow=False,
+                font=dict(color='black'),
+                yshift=10,
+                xshift=-20,
+                yref='y2',
+                opacity=0.6
+
+            )
+        if 'simulated' in st.session_state['tracking'] and st.session_state['tracking']['simulated']:
+            data = mroi_plot(dataframe, level, simulated_numeric_variables, percents=percents)
+            if data is not None:
+                k=0
+                for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
+                    dict_for_opt_colors[variable] = labels_for_opt_colors[k]
+                    k=k+1
+
+                for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
+                    fig.add_trace(go.Bar(x=data.index,
+                                         y=data[variable + pct],
+                                         name=data[variable].name,
+                                         opacity=0.6,
+                                         xperiodalignment='middle',
+                                        marker_color=dict_for_opt_colors[variable]
+                                         )
+                                  )
+                mroi_data = data[_('Simulated Revenue')] / data[_('Simulated Spend')]
+                fig.add_trace(go.Scatter(x=data.index,
+                                         y=mroi_data,
+                                         name=_('Simulated') + ' MROI',
+                                         xperiodalignment='middle',
+                                         mode='markers',
+                                         opacity=0.6,
+                                         marker=dict(
+                                             size=13,
+                                             color='darkslategray'
+                                         ),
+                                         yaxis='y2',
+                                         text=mroi_data,  # Include Y values in marker text
+                                         textposition='bottom center'
+                                         )
+                              )
+                # add annotations for each mroi marker
+                for x, y, text in zip(data.index, mroi_data, mroi_data):
+                    fig.add_annotation(
+                        x=x,
+                        y=y,
+                        text=round(text, 2),
+                        showarrow=False,
+                        font=dict(color='black'),
+                        yshift=10,
+                        xshift=20,
+                        yref='y2',
+                        opacity=0.6
+                    )
+
+        title = f'{", ".join([variable for variable in numeric_variables + simulated_numeric_variables if not _("Contribution").lower() in variable.lower()] + ["MROI"])}'
+        fig.update_layout(
+            height=600,
+            title=title,
+            legend=dict(
+                orientation='h',
+                yanchor='bottom',
+                y=-0.5,
+                xanchor='right',
+                x=1
+            ),
+            yaxis=dict(
+                title=dict(text=f'{_("Spend")}, {_("Revenue")}'),
+                side='left',
+                tickprefix=prefix,
+                ticksuffix=suffix,
+                # tickformat=',.0f',
+            ),
+            yaxis2=dict(
+                title=dict(text='MROI'),
+                side='right',
+                overlaying='y',
+                tickmode='sync',
+                # tickformat=',.2f'
+            )
+        )
+        fig.update_xaxes(showgrid=True)
+        st.plotly_chart(fig, use_container_width=True)
 
     # Time series plot
     fig = go.Figure()
@@ -197,9 +310,9 @@ def plan_plotting_tab(dataframe):
             showgrid=True
         ),
         xaxis_tickformatstops=[
-            dict(dtickrange=[604800000, 'M1'], value='%d-%m-%Y'),
-            dict(dtickrange=['M1', 'M12'], value='%m-%Y'),
-            dict(dtickrange=['M12', None], value='%Y')
+            dict(dtickrange=[604800000, 'M1'], value='Месяц %m'),
+            dict(dtickrange=['M1', 'M12'], value='Месяц %m'),
+            dict(dtickrange=['M12', None], value='Год %Y')
         ],
         legend=dict(
             orientation='h',
@@ -213,7 +326,7 @@ def plan_plotting_tab(dataframe):
             side='left',
             tickprefix=prefix,
             ticksuffix=suffix,
-            tickformat=',.0f'
+            # tickformat=',.0f'
         ),
         yaxis2=dict(
             title=dict(text=f'{_("Contribution")}, {contribution_dim}'),
@@ -221,154 +334,7 @@ def plan_plotting_tab(dataframe):
             overlaying='y',
             tickmode='sync',
             tickprefix='',
-            tickformat=',.0f'
+            # tickformat=',.0f'
         )
     )
     st.plotly_chart(fig, use_container_width=True)
-
-    # MROI plot
-    fig = go.Figure()
-    # calculate mroi data
-    labels_for_colors=[]
-    data = mroi_plot(dataframe, level, numeric_variables, percents=percents)
-    if data is not None:
-        for i in range(len(data.index)):
-            labels_for_colors.append(data.index[i])
-
-        for label in labels_for_colors:
-            contribution_colors_mroi_list.append(contribution_colors[label])
-            spend_colors_mroi_list.append(spend_colors[label])
-            revenue_colors_mroi_list.append(revenue_colors[label])
-        mroi_color_list.append(spend_colors_mroi_list)
-        mroi_color_list.append(revenue_colors_mroi_list)
-        mroi_color_list.append(contribution_colors_mroi_list)
-            
-        k=0
-        for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
-            mroi_colors[variable] = mroi_color_list[k]
-            k=k+1
-
-        for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
-            fig.add_trace(go.Bar(x=data.index,
-                                 y=data[variable + pct],
-                                 name=data[variable].name,
-                                 opacity=0.6,
-                                 xperiodalignment='middle',
-                                 marker_color=mroi_colors[variable]
-                                 )
-                          )
-        mroi_data = data[_('Revenue Calculated')] / data[_('Spend')]
-        for variable in sorted(set(numeric_variables_to_plot).intersection(numeric_variables)):
-            fig.add_trace(go.Scatter(x=data.index,
-                                    y=mroi_data,
-                                    name='MROI',
-                                    xperiodalignment='middle',
-                                    mode='markers',
-                                    marker=dict(
-                                        size=10,
-                                        color=mroi_colors[variable]
-                                    ),
-                                    yaxis='y2',
-                                    text=mroi_data,  # Include Y values in marker text
-                                    textposition='bottom center'
-                                    )
-                        )
-        # add annotations for each mroi marker
-        for x, y, text in zip(data.index, mroi_data, mroi_data):
-            fig.add_annotation(
-                x=x,
-                y=y,
-                text=round(text, 2),
-                showarrow=False,
-                font=dict(color='black'),
-                yshift=10,
-                xshift=-20,
-                yref='y2',
-                opacity=0.6
-
-            )
-        if 'simulated' in st.session_state['tracking'] and st.session_state['tracking']['simulated']:
-            data = mroi_plot(dataframe, level, simulated_numeric_variables, percents=percents)
-            if data is not None:
-                for i in range(len(data.index)):
-                    labels_for_colors.append(data.index[i])
-
-                for label in labels_for_colors:
-                    optimization_spend_colors_mroi_list.append(spend_optimization_colors[label])
-                    optimization_revenue_colors_mroi_list.append(revenue_optimization_colors[label])
-                    optimization_contribution_colors_mroi_list.append(contribution_optimization_colors[label])
-                optimization_mroi_color_list.append(optimization_spend_colors_mroi_list)
-                optimization_mroi_color_list.append(optimization_revenue_colors_mroi_list)
-                optimization_mroi_color_list.append(optimization_contribution_colors_mroi_list)
-            
-                k=0
-                for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
-                    optimization_colors[variable] = optimization_mroi_color_list[k]
-                    k=k+1
-
-                for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
-                    fig.add_trace(go.Bar(x=data.index,
-                                         y=data[variable + pct],
-                                         name=data[variable].name,
-                                         opacity=0.6,
-                                         xperiodalignment='middle',
-                                         marker_color=optimization_colors[variable]
-                                         )
-                                  )
-                mroi_data = data[_('Simulated Revenue')] / data[_('Simulated Spend')]
-                fig.add_trace(go.Scatter(x=data.index,
-                                         y=mroi_data,
-                                         name=_('Simulated') + ' MROI',
-                                         xperiodalignment='middle',
-                                         mode='markers',
-                                         marker=dict(
-                                             size=10,
-                                             color=optimization_colors[variable]
-                                         ),
-                                         yaxis='y2',
-                                         text=mroi_data,  # Include Y values in marker text
-                                         textposition='bottom center'
-                                         )
-                              )
-                # add annotations for each mroi marker
-                for x, y, text in zip(data.index, mroi_data, mroi_data):
-                    fig.add_annotation(
-                        x=x,
-                        y=y,
-                        text=round(text, 2),
-                        showarrow=False,
-                        font=dict(color='black'),
-                        yshift=10,
-                        xshift=20,
-                        yref='y2',
-                        opacity=0.6
-                    )
-
-        title = f'{", ".join([variable for variable in numeric_variables + simulated_numeric_variables if not _("Contribution").lower() in variable.lower()] + ["MROI"])}'
-        fig.update_layout(
-            height=600,
-            title=title,
-            legend=dict(
-                orientation='h',
-                yanchor='bottom',
-                y=-0.5,
-                xanchor='right',
-                x=1
-            ),
-            yaxis=dict(
-                title=dict(text=f'{_("Spend")}, {_("Revenue")}'),
-                side='left',
-                tickprefix=prefix,
-                ticksuffix=suffix,
-                tickformat=',.0f',
-            ),
-            yaxis2=dict(
-                title=dict(text='MROI'),
-                side='right',
-                overlaying='y',
-                tickmode='sync',
-                tickformat=',.2f'
-            )
-        )
-        fig.update_xaxes(showgrid=True)
-        st.plotly_chart(fig, use_container_width=True)

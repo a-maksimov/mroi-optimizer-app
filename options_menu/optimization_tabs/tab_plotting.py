@@ -21,38 +21,22 @@ def opt_plotting_tab(dataframe):
     optimized_numeric_variables = [variable for variable in optimized_numeric_variables
                                    if variable in dataframe.columns]
     
-    #color's sequence: orange, yellow, red, blue, green, violet, pink
-    base_colors_timeseries=['#eb6e21','#f7db05','#d62b2b','#1e3ac7','#13bd21','#7308c4','#d936c6']
+    #color's sequence: peach, teal, red, ice, tealgrn, violet, pink
+    colors_contribution=['#F8BF97','#9DD4D4','#EC939D','#63A9C7','#85E6AB', '#E0C2F0', '#ECAABF']
+    colors_spend=['#F6A479', '#78B9C1', '#D87187', '#4175B5', '#61D7A5', '#C7A5E3', '#D682B5']
+    colors_revenue=['#F28A61','#5799AC','#B74F72','#3C488F','#42BDA3', '#AC8DD5', '#B263AE']
 
-    colors_contribution=['#F7A15B','#FFEC5E','#F76F6F','#8554F7','#4AF77B', '#C64AF7', '#F763F7']
-    colors_spend=['#C25F0E', '#EBD110', '#C21D1D', '#4008C2', '#00C237', '#8B00C2', '#C213C2']
-    colors_revenue=['#F57811','#F5F231','#F52525','#5109F4','#00F545', '#B000F5', '#F518F5']
+    colors_revenue_optimization=['#EB4C41', '#2B5876', '#6E2348', '#191934', '#268199', '#675BA3', '#623F8E']
+    colors_spend_optimization=['#EF6F4F', '#3B7490', '#96375E', '#2E2C5B', '#32A5A1', '#8D75C2', '#8E50A4']
+    colors_contribution_optimization=['#FCDCBF', '#C9EAE7', '#FBBBBB', '#C2E6E9', '#A9F0B9', '#F1DDF7', '#F8D9D8']
 
-    colors_optimization=['#ff8317', '#fcf40d', '#fc1e2d', '#1938fc', '#19fa19', '#7611f2', '#fc17e5']
-
-    colors_revenue_optimization=['#DB6B0F', '#FFE312', '#DB2121', '#760CF5', '#00DB3E', '#9D00DB', '#DB16DB']
-    colors_spend_optimization=['#B5580D', '#CCB60E', '#B51B1B', '#260575', '#00B533', '#540075', '#750C75']
-    colors_contribution_optimization=['#FA825D', '#FFDA65', '#F76266', '#BA9FF9', '#95F9B1', '#DC95F9', '#F9AEF9']
-
-
-    spend_colors_mroi_list=[]
-    revenue_colors_mroi_list=[] 
-    contribution_colors_mroi_list=[]
-    optimization_contribution_colors_mroi_list=[]
-    optimization_revenue_colors_mroi_list=[]
-    optimization_spend_colors_mroi_list=[]
-    mroi_color_list=[]
-    optimization_mroi_color_list=[]
-
-    granularity_colors ={}
     contribution_colors ={}
     spend_colors ={}
     revenue_colors ={}
-    optimization_colors={}
+ 
     contribution_optimization_colors={}
     spend_optimization_colors={}
     revenue_optimization_colors={}
-    mroi_colors={}
 
     # check if user has selected any granularity in sidebar
     # iterate backwards through the granularity levels and use the first one that is not empty
@@ -91,7 +75,6 @@ def opt_plotting_tab(dataframe):
         pct = '_pct'
     
     for i in range(len(granularity_to_plot)):
-        granularity_colors[granularity_to_plot[i]] = base_colors_timeseries[i]
         contribution_colors[granularity_to_plot[i]] = colors_contribution[i]
         spend_colors[granularity_to_plot[i]] = colors_spend[i]
         revenue_colors[granularity_to_plot[i]] = colors_revenue[i]
@@ -99,159 +82,118 @@ def opt_plotting_tab(dataframe):
         spend_optimization_colors[granularity_to_plot[i]]=colors_spend_optimization[i]
         contribution_optimization_colors[granularity_to_plot[i]]=colors_contribution_optimization[i]
 
+    # Pie(ex-stacked) charts
+    # calculate pie chart data
+    data = bar_data(dataframe, level, granularity_to_plot, numeric_variables_to_plot, percents=percents)
+    if data is not None:
+        col_1, col_2 = st.columns(2)
+        # plot spends
+        spends_to_plot = [numeric_variable for numeric_variable in numeric_variables_to_plot
+                          if _('Spend').lower() in numeric_variable.lower()]
+        revenues_to_plot = [numeric_variable for numeric_variable in numeric_variables_to_plot
+                            if _('Revenue').lower() in numeric_variable.lower()]
+        data = stacked_bar_data(dataframe, level, granularity_to_plot, spends_to_plot, percents=percents)
 
-    # Time series plot
-    fig = go.Figure()
-    for numeric_variable in [variable for variable in numeric_variables_to_plot
-                             if _('Simulated').lower() in variable.lower()]:
-        granularity_to_plot = sorted(granularity_to_plot,
-                                     key=lambda g: dataframe[dataframe[level] == g][numeric_variable].sum(),
-                                     reverse=True)
-        # https://dev.to/fronkan/stacked-and-grouped-bar-charts-using-plotly-python-a4p
-        timeseries = timeseries_data(dataframe, level, numeric_variable, percents=percents)
-        if timeseries is not None:
-            base = 0
-            for granularity in granularity_to_plot:
-                # create a new DataFrame called ts and initialize it with zeros
-                # using the same index as the timeseries DataFrame.
-                ts = pd.DataFrame(0, index=timeseries.index.unique(), columns=[numeric_variable])
-                # filter the timeseries DataFrame based on the condition `timeseries[level] == granularity`
-                # and assign the filtered values to ts.
-                ts.loc[timeseries.index[timeseries[level] == granularity], [numeric_variable]] = \
-                    timeseries.loc[timeseries[level] == granularity, [numeric_variable]]
-                
-                if _('Spend').lower() in numeric_variable.lower():
-                    fig.add_trace(go.Bar(x=ts.index,
-                                         y=ts[numeric_variable],
-                                         name=f'{numeric_variable}, {granularity}',
-                                         opacity=0.6,
-                                         offsetgroup=0,
-                                         marker_color=spend_colors[granularity],
-                                         base=base
-                                         )
-                                  )
-                    base += ts[numeric_variable]
-                elif _('Revenue').lower() in numeric_variable.lower():
-                    fig.add_trace(go.Scatter(x=ts.index,
-                                             y=ts[numeric_variable],
-                                             name=f'{numeric_variable}, {granularity}',
-                                             mode='markers+lines',
-                                             marker_color=revenue_colors[granularity]
-                                             )
-                                  )
-                else:  # Contribution
-                    fig.add_trace(go.Scatter(x=ts.index,
-                                             y=ts[numeric_variable],
-                                             name=f'{numeric_variable}, {granularity}',
-                                             mode='markers+lines',
-                                             marker_color=contribution_colors[granularity],
-                                             yaxis='y2'
-                                             )
-                                  )
-    # after optimization
-    if 'df_optimized' in st.session_state['tracking']:
-        for numeric_variable in [variable for variable in numeric_variables_to_plot
-                                 if _('Optimized').lower() in variable.lower()]:
-            granularity_to_plot = sorted(granularity_to_plot,
-                                         key=lambda g: dataframe[dataframe[level] == g][numeric_variable].sum(),
-                                         reverse=True)
-            timeseries = timeseries_data(dataframe, level, numeric_variable, percents=percents)
+        simulated_spend=data[data[_('Spend')]==_('Simulated Spend')]
+        optimized_spend=data[data[_('Spend')]==_('Optimized Spend')]
 
-            if timeseries is not None:
-                base = 0
-                for granularity in granularity_to_plot:
-                    # create a new DataFrame called ts and initialize it with zeros
-                    # using the same index as the timeseries DataFrame.
-                    ts = pd.DataFrame(0, index=timeseries.index.unique(), columns=[numeric_variable])
-                    # filter the timeseries DataFrame based on the condition `timeseries[level] == granularity`
-                    # and assign the filtered values to ts.
-                    ts.loc[timeseries.index[timeseries[level] == granularity], [numeric_variable]] = \
-                        timeseries.loc[timeseries[level] == granularity, [numeric_variable]]
-                    if _('Spend').lower() in numeric_variable.lower():
-                        fig.add_trace(go.Bar(x=ts.index,
-                                             y=ts[numeric_variable],
-                                             name=f'{numeric_variable}, {granularity}',
-                                             opacity=0.6,
-                                             offsetgroup=1,
-                                             marker_color=spend_optimization_colors[granularity],
-                                             base=base
-                                             )
-                                      )
-                        base += ts[numeric_variable]
-                    elif _('Revenue').lower() in numeric_variable.lower():
-                        fig.add_trace(go.Scatter(x=ts.index,
-                                                 y=ts[numeric_variable],
-                                                 name=f'{numeric_variable}, {granularity}',
-                                                 marker_color=revenue_optimization_colors[granularity],
-                                                 mode='markers+lines'
-                                                 )
-                                      )
-                    else:  # Contribution
-                        fig.add_trace(go.Scatter(x=ts.index,
-                                                 y=ts[numeric_variable],
-                                                 name=f'{numeric_variable}, {granularity}',
-                                                 marker_color=contribution_optimization_colors[granularity],
-                                                 mode='markers+lines',
-                                                 yaxis='y2',
-                                                 )
-                                      )
-    fig.update_layout(
-        height=600,
-        title=f'{", ".join(numeric_variables_to_plot)}',
-        xaxis=dict(
-            type='date',
-            ticklabelmode='period',
-            showgrid=True
-        ),
-        xaxis_tickformatstops=[
-            dict(dtickrange=[604800000, 'M1'], value='%d-%m-%Y'),
-            dict(dtickrange=['M1', 'M12'], value='%m-%Y'),
-            dict(dtickrange=['M12', None], value='%Y')
-        ],
-        legend=dict(
-            orientation='h',
-            yanchor='bottom',
-            y=-1,
-            xanchor='right',
-            x=1
-        ),
-        yaxis=dict(
-            title=dict(text=f'{_("Revenue")}, {_("Spend")}'),
-            side='left',
-            tickprefix=prefix,
-            ticksuffix=suffix,
-            tickformat=',.0f'
-        ),
-        yaxis2=dict(
-            title=dict(text=f'{_("Contribution")}, {contribution_dim}'),
-            side='right',
-            overlaying='y',
-            tickmode='sync',
-            tickprefix='',
-            tickformat=',.0f'
-        )
-    )
-    st.plotly_chart(fig, use_container_width=True)
+        # after optimization
+        if 'df_optimized' in st.session_state['tracking']:
+            with col_2:
+                fig = go.Figure()
+                fig.add_trace(go.Pie( 
+                        labels=optimized_spend.iloc[:, 0],
+                        values=optimized_spend['value'],
+                        marker_colors=optimized_spend.iloc[:, 0].map(spend_colors),
+                        texttemplate=optimized_spend['value'].apply(lambda n: f'{prefix} {format(n,",.0f").replace(",", " ")}{suffix}'),
+                        opacity=0.8
+                        ))
+                fig.update_traces(hovertemplate='Value: %{texttemplate}<extra></extra>', 
+                                    title = dict(text=_('Optimized Spend'),
+                                                position="bottom center",
+                                                font_size=20)
+                                           )
+                fig.update_yaxes(visible=False)
+                fig.update_layout(legend=dict(orientation="h", 
+                                                yanchor='bottom',
+                                                y=-0.5,
+                                                xanchor='right',
+                                                x=1
+                                                ),
+                                            autosize=False,
+                                            width=600,
+                                            height=600
+                                            # title=_('Budget Allocation')
+                                            )
+                st.plotly_chart(fig, use_container_width=True)
+            with col_1:
+                fig = go.Figure()
+                fig.add_trace(go.Pie( 
+                        labels=simulated_spend.iloc[:, 0],
+                        values=simulated_spend['value'],
+                        marker_colors=simulated_spend.iloc[:, 0].map(spend_colors),
+                        texttemplate=simulated_spend['value'].apply(lambda n: f'{prefix} {format(n,",.0f").replace(",", " ")}{suffix}'),
+                        opacity=0.8
+                        ))
+                fig.update_traces(hovertemplate='Value: %{texttemplate}<extra></extra>', 
+                                    title = dict(text=_('Simulated Spend'),
+                                                position="bottom center",
+                                                font_size=20)
+                                           )
+                fig.update_yaxes(visible=False)
+                fig.update_layout(legend=dict(orientation="h", 
+                                                yanchor='bottom',
+                                                y=-0.5,
+                                                xanchor='right',
+                                                x=1
+                                                ),
+                                            title=_('Budget Allocation'),
+                                            autosize=False,
+                                            width=600,
+                                            height=600
+                                            )
+                st.plotly_chart(fig, use_container_width=True)
+        # befor optimization
+        else:
+            fig = go.Figure()
+            fig.add_trace(go.Pie( 
+                        labels=simulated_spend.iloc[:, 0],
+                        values=simulated_spend['value'],
+                        marker_colors=simulated_spend.iloc[:, 0].map(spend_colors),
+                        texttemplate=simulated_spend['value'].apply(lambda n: f'{prefix} {format(n,",.0f").replace(",", " ")}{suffix}'),
+                        opacity=0.8
+                        ))
+            fig.update_traces(hovertemplate='Value: %{texttemplate}<extra></extra>', 
+                              title = dict(text=_('Simulated Spend'),
+                                           position="bottom center",
+                                           font_size=20)
+                            )
+            fig.update_yaxes(visible=False)
+            fig.update_layout(legend=dict(orientation="h", 
+                                        yanchor='bottom',
+                                        y=-0.5,
+                                        xanchor='right',
+                                        x=1
+                                        ),
+                                title=_('Budget Allocation'),
+                                autosize=False,
+                                width=600,
+                                height=600
+                                )
+            st.plotly_chart(fig, use_container_width=True)
+    
     # MROI plot
     fig = go.Figure()
     # calculate mroi data
-    labels_for_colors=[]
+    labels_for_colors=['#0068C9','lightskyblue','deepskyblue']
+    labels_for_opt_colors=['darkcyan','darkturquoise','cyan']
+    dict_for_colors={}
+    dict_for_opt_colors={}
     data = mroi_plot(dataframe, level, simulated_numeric_variables, percents=percents)
     if data is not None:
-        for i in range(len(data.index)):
-            labels_for_colors.append(data.index[i])
-
-        for label in labels_for_colors:
-            contribution_colors_mroi_list.append(contribution_colors[label])
-            spend_colors_mroi_list.append(spend_colors[label])
-            revenue_colors_mroi_list.append(revenue_colors[label])
-        mroi_color_list.append(spend_colors_mroi_list)
-        mroi_color_list.append(revenue_colors_mroi_list)
-        mroi_color_list.append(contribution_colors_mroi_list)
-            
         k=0
         for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
-            mroi_colors[variable] = mroi_color_list[k]
+            dict_for_colors[variable] = labels_for_colors[k]
             k=k+1
 
         for variable in sorted(set(numeric_variables_to_plot).intersection(simulated_numeric_variables)):
@@ -259,7 +201,7 @@ def opt_plotting_tab(dataframe):
                                  y=data[variable + pct],
                                  name=f'{data[variable].name}',
                                  opacity=0.6,
-                                 marker_color=mroi_colors[variable],
+                                 marker_color=dict_for_colors[variable],
                                  xperiodalignment='middle'
                                  )
                           )
@@ -269,9 +211,10 @@ def opt_plotting_tab(dataframe):
                                  name=_('Simulated') + ' MROI',
                                  xperiodalignment='middle',
                                  mode='markers',
+                                 opacity=0.9,
                                  marker=dict(
                                      size=10,
-                                     color=mroi_colors[variable]
+                                     color='red'
                                  ),
                                  yaxis='y2',
                                  text=mroi_data,  # Include Y values in marker text
@@ -296,20 +239,9 @@ def opt_plotting_tab(dataframe):
         if 'df_optimized' in st.session_state['tracking']:
             data = mroi_plot(dataframe, level, optimized_numeric_variables, percents=percents)
             if data is not None:
-                for i in range(len(data.index)):
-                    labels_for_colors.append(data.index[i])
-
-                for label in labels_for_colors:
-                    optimization_spend_colors_mroi_list.append(spend_optimization_colors[label])
-                    optimization_revenue_colors_mroi_list.append(revenue_optimization_colors[label])
-                    optimization_contribution_colors_mroi_list.append(contribution_optimization_colors[label])
-                optimization_mroi_color_list.append(optimization_spend_colors_mroi_list)
-                optimization_mroi_color_list.append(optimization_revenue_colors_mroi_list)
-                optimization_mroi_color_list.append(optimization_contribution_colors_mroi_list)
-            
                 k=0
                 for variable in sorted(set(numeric_variables_to_plot).intersection(optimized_numeric_variables)):
-                    optimization_colors[variable] = optimization_mroi_color_list[k]
+                    dict_for_opt_colors[variable] = labels_for_opt_colors[k]
                     k=k+1
 
                 for variable in sorted(set(numeric_variables_to_plot).intersection(optimized_numeric_variables)):
@@ -317,7 +249,7 @@ def opt_plotting_tab(dataframe):
                                          y=data[variable + pct],
                                          name=f'{data[variable].name}',
                                          opacity=0.6,
-                                         marker_color=optimization_colors[variable],
+                                         marker_color=dict_for_opt_colors[variable],
                                          xperiodalignment='middle'
                                          )
                                   )
@@ -327,9 +259,10 @@ def opt_plotting_tab(dataframe):
                                          name=_('Optimized') + ' MROI',
                                          xperiodalignment='middle',
                                          mode='markers',
+                                         opacity=0.6,
                                          marker=dict(
-                                             size=10,
-                                             color=optimization_colors[variable]
+                                             size=13,
+                                             color='darkslategray'
                                          ),
                                          yaxis='y2',
                                          text=mroi_data,  # Include Y values in marker text
@@ -366,14 +299,14 @@ def opt_plotting_tab(dataframe):
                 side='left',
                 tickprefix=prefix,
                 ticksuffix=suffix,
-                tickformat=',.0f',
+                # tickformat=',.0f',
             ),
             yaxis2=dict(
                 title=dict(text='MROI'),
                 side='right',
                 overlaying='y',
                 tickmode='sync',
-                tickformat=',.2f'
+                # tickformat=',.2f'
             )
         )
         fig.update_xaxes(showgrid=True)
@@ -384,8 +317,9 @@ def opt_plotting_tab(dataframe):
     data = bar_data(dataframe, level, granularity_to_plot, numeric_variables_to_plot, percents=percents)
     if data is not None:
         color_bar={}
-        color_bar.update(optimization_colors)
-        color_bar.update(mroi_colors)
+        color_bar.update(dict_for_opt_colors)
+        color_bar.update(dict_for_colors)
+
         col_1, col_2 = st.columns(2)
         # plot spends
         spends_to_plot = [numeric_variable for numeric_variable in numeric_variables_to_plot
@@ -402,7 +336,8 @@ def opt_plotting_tab(dataframe):
                     name=data[spend].name,
                     orientation='h',
                     marker_color=color_bar[spend],
-                    opacity=0.6))
+                    opacity=0.6
+                    ))
             fig.update_layout(
                 title=_('Spends before and after optimization'),
                 xaxis_title=_('Spend'),
@@ -448,17 +383,144 @@ def opt_plotting_tab(dataframe):
                 )
                 st.plotly_chart(fig, use_container_width=True)
 
-        # Stacked charts
-        # calculate stacked bar data
-        data = stacked_bar_data(dataframe, level, granularity_to_plot, spends_to_plot, percents=percents)
-        fig = px.bar(data,
-                     x=_('Spend'),
-                     y='value',
-                     color=level,
-                     title=_('Budget Allocation'),
-                     text=data['value'].apply(lambda n: f'{prefix} {n:.0f}{suffix}'),
-                     color_discrete_map=spend_colors,
-                     opacity=0.5)
-        fig.update_traces(hovertemplate='Value: %{text}<extra></extra>')
-        fig.update_yaxes(visible=False)
-        st.plotly_chart(fig, use_container_width=True)
+
+# Time series plot
+    fig = go.Figure()
+    for numeric_variable in [variable for variable in numeric_variables_to_plot
+                             if _('Simulated').lower() in variable.lower()]:
+        granularity_to_plot = sorted(granularity_to_plot,
+                                     key=lambda g: dataframe[dataframe[level] == g][numeric_variable].sum(),
+                                     reverse=True)
+        # https://dev.to/fronkan/stacked-and-grouped-bar-charts-using-plotly-python-a4p
+        timeseries = timeseries_data(dataframe, level, numeric_variable, percents=percents)
+
+        if timeseries is not None:
+            base = 0
+            for granularity in granularity_to_plot:
+                # create a new DataFrame called ts and initialize it with zeros
+                # using the same index as the timeseries DataFrame.
+                ts = pd.DataFrame(0, index=timeseries.index.unique(), columns=[numeric_variable])
+                # filter the timeseries DataFrame based on the condition `timeseries[level] == granularity`
+                # and assign the filtered values to ts.
+                ts.loc[timeseries.index[timeseries[level] == granularity], [numeric_variable]] = \
+                    timeseries.loc[timeseries[level] == granularity, [numeric_variable]]
+                
+                if _('Spend').lower() in numeric_variable.lower():
+                    fig.add_trace(go.Bar(x=ts.index,
+                                         y=ts[numeric_variable],
+                                         name=f'{numeric_variable}, {granularity}',
+                                         opacity=0.6,
+                                         offsetgroup=0,
+                                         marker={
+                                             'color': spend_colors[granularity]},
+                                         base=base
+                                         )
+                                  )
+                    base += ts[numeric_variable]
+                elif _('Revenue').lower() in numeric_variable.lower():
+                    fig.add_trace(go.Scatter(x=ts.index,
+                                             y=ts[numeric_variable],
+                                             name=f'{numeric_variable}, {granularity}',
+                                             mode='markers+lines',
+                                             marker = {
+                                                 'color': revenue_colors[granularity]}
+                                             )
+                                  )
+                else:  # Contribution
+                    fig.add_trace(go.Scatter(x=ts.index,
+                                             y=ts[numeric_variable],
+                                             name=f'{numeric_variable}, {granularity}',
+                                             mode='markers+lines',
+                                             marker = {
+                                                 'color': contribution_colors[granularity]},
+                                             yaxis='y2'
+                                             )
+                                  )
+    # after optimization
+    if 'df_optimized' in st.session_state['tracking']:
+        for numeric_variable in [variable for variable in numeric_variables_to_plot
+                                 if _('Optimized').lower() in variable.lower()]:
+            granularity_to_plot = sorted(granularity_to_plot,
+                                         key=lambda g: dataframe[dataframe[level] == g][numeric_variable].sum(),
+                                         reverse=True)
+            timeseries = timeseries_data(dataframe, level, numeric_variable, percents=percents)
+
+            if timeseries is not None:
+                base = 0
+                for granularity in granularity_to_plot:
+                    # create a new DataFrame called ts and initialize it with zeros
+                    # using the same index as the timeseries DataFrame.
+                    ts = pd.DataFrame(0, index=timeseries.index.unique(), columns=[numeric_variable])
+                    # print(timeseries.index)
+                    # filter the timeseries DataFrame based on the condition `timeseries[level] == granularity`
+                    # and assign the filtered values to ts.
+                    ts.loc[timeseries.index[timeseries[level] == granularity], [numeric_variable]] = \
+                        timeseries.loc[timeseries[level] == granularity, [numeric_variable]]
+                    if _('Spend').lower() in numeric_variable.lower():
+                        fig.add_trace(go.Bar(x=ts.index,
+                                             y=ts[numeric_variable],
+                                             name=f'{numeric_variable}, {granularity}',
+                                             opacity=0.6,
+                                             offsetgroup=1,
+                                             marker={
+                                                 'color': spend_optimization_colors[granularity]},
+                                             base=base
+                                             )
+                                      )
+                        base += ts[numeric_variable]
+                    elif _('Revenue').lower() in numeric_variable.lower():
+                        fig.add_trace(go.Scatter(x=ts.index,
+                                                 y=ts[numeric_variable],
+                                                 name=f'{numeric_variable}, {granularity}',
+                                                 marker={
+                                                     'color': revenue_optimization_colors[granularity]},
+                                                 mode='markers+lines'
+                                                 )
+                                      )
+                    else:  # Contribution
+                        fig.add_trace(go.Scatter(x=ts.index,
+                                                 y=ts[numeric_variable],
+                                                 name=f'{numeric_variable}, {granularity}',
+                                                 marker={
+                                                     'color': contribution_optimization_colors[granularity]},
+                                                 mode='markers+lines',
+                                                 yaxis='y2',
+                                                 )
+                                      )
+    fig.update_layout(
+        height=600,
+        title=f'{", ".join(numeric_variables_to_plot)}',
+        xaxis=dict(
+            type='date',
+            ticklabelmode='period',
+            showgrid=True
+        ),
+        xaxis_tickformatstops=[
+            dict(dtickrange=[604800000, 'M1'], value='Месяц %m'),
+            dict(dtickrange=['M1', 'M12'], value='Месяц %m'),
+            dict(dtickrange=['M12', None], value='Год %Y')
+        ],
+        legend=dict(
+            orientation='h',
+            yanchor='bottom',
+            y=-1,
+            xanchor='right',
+            x=1
+        ),
+        yaxis=dict(
+            title=dict(text=f'{_("Revenue")}, {_("Spend")}'),
+            side='left',
+            tickprefix=prefix,
+            ticksuffix=suffix,
+            # tickformat=',.0f'
+        ),
+        yaxis2=dict(
+            title=dict(text=f'{_("Contribution")}, {contribution_dim}'),
+            side='right',
+            overlaying='y',
+            tickmode='sync',
+            tickprefix='',
+            # tickformat=',.0f'
+        )
+    )
+    st.plotly_chart(fig, use_container_width=True)
