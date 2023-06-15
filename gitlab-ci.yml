@@ -1,0 +1,88 @@
+image: docker:20.10.16
+
+stages:
+  - test
+  - build
+  - deploy.pre
+  - deploy
+
+variables:
+  # When you use the dind service, you must instruct Docker to talk with
+  # the daemon started inside of the service. The daemon is available
+  # with a network connection instead of the default
+  # /var/run/docker.sock socket. Docker 19.03 does this automatically
+  # by setting the DOCKER_HOST in
+  # https://github.com/docker-library/docker/blob/d45051476babc297257df490d22cbd806f1b11e4/19.03/docker-entrypoint.sh#L23-L29
+  #
+  # The 'docker' hostname is the alias of the service container as described at
+  # https://docs.gitlab.com/ee/ci/services/#accessing-the-services.
+  #
+  # Specify to Docker where to create the certificates. Docker
+  # creates them automatically on boot, and creates
+  # `/certs/client` to share between the service and job
+  # container, thanks to volume mount from config.toml
+  DOCKER_TLS_CERTDIR: "/certs"
+  # https://stackoverflow.com/questions/38402628/aws-configure-in-docker-container-will-not-use-environment-variables-or-config
+  MAIN_BRANCH: "master"
+
+services:
+  - docker:20.10.16-dind
+
+
+test:
+  rules:
+    - if: '$CI_PIPELINE_SOURCE == "merge_request_event" && $CI_MERGE_REQUEST_TARGET_BRANCH_NAME == $MAIN_BRANCH'
+  variables:
+    CONTAINER_TAG: test
+  stage: test
+  tags:
+    - building
+  before_script:
+    - apk add curl sudo
+  script:
+    - sudo docker build -t $CONTAINER_NAME .
+    - sudo docker tag $CONTAINER_NAME cr.yandex/$REGISTRY_ID/$CONTAINER_NAME:$CONTAINER_TAG
+
+build:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $MAIN_BRANCH
+  stage: build
+  tags:
+    - building
+  before_script:
+    - apk add curl
+    - apk add sudo
+  script:
+    - sudo docker build -t $CONTAINER_NAME .
+    - sudo docker tag $CONTAINER_NAME cr.yandex/$REGISTRY_ID/$CONTAINER_NAME:latest
+    - curl -H Metadata-Flavor:Google $CLOUD_SERVER_IP/computeMetadata/v1/instance/service-accounts/default/token | cut -f1 -d',' | cut -f2 -d':' | tr -d '"' | sudo docker login --username iam --password-stdin cr.yandex
+    - sudo docker push cr.yandex/$REGISTRY_ID/$CONTAINER_NAME:latest
+
+deploy.pre:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $MAIN_BRANCH
+  stage: deploy.pre
+  allow_failure: true
+  tags:
+    - web-case.deploy
+  before_script:
+    - docker info
+    - apk add curl
+    - apk add sudo
+  script:
+    - sudo docker stop $CONTAINER_NAME
+    - sudo docker rm $CONTAINER_NAME
+
+deploy:
+  rules:
+    - if: $CI_COMMIT_BRANCH == $MAIN_BRANCH
+  stage: deploy
+  tags:
+    - web-case.deploy
+  before_script:
+    - apk add curl
+    - apk add sudo
+  script:
+    - curl -H Metadata-Flavor:Google $CLOUD_SERVER_IP/computeMetadata/v1/instance/service-accounts/default/token | cut -f1 -d',' | cut -f2 -d':' | tr -d '"' | sudo docker login --username iam --password-stdin cr.yandex
+    - sudo docker pull cr.yandex/$REGISTRY_ID/$CONTAINER_NAME:latest
+    - sudo docker run --name $CONTAINER_NAME -d --env-file=.env -p $EXTERNAL_PORT:8000 --restart=unless-stopped cr.yandex/$REGISTRY_ID/$CONTAINER_NAME:latest
