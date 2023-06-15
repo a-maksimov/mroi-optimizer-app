@@ -41,14 +41,12 @@ def plan_input():
     """
     # display_planned_budget is initialized in the calculate_plan
     default_value = st.session_state['tracking']['display_planned_budget']
-    default_value = '{:.2f}'.format(default_value)
+    value = utils.display_currency(default_value)
 
     st.text_input(f'{_("Enter planned budget") + ", €"}',
-                  value=default_value,
+                  value=value,
                   key='planned_budget',
                   on_change=handle_plan_input)
-
-    default_value = float(default_value)
 
     if default_value > st.session_state['tracking']['display_planned_budget'] * 2:
         st.error(_('Error: Number too large.'))
