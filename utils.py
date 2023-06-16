@@ -60,6 +60,8 @@ def create_checkbox(key):
 def parse_input(input_text):
     """ Parse and validate input text """
     # replacement of possible phrases to allowed
+    input_text = input_text.replace('кг', '')
+
     possible_phrases_of_m = ['mln', 'mil', 'млн', 'млн.', 'м', 'М', 'kk']
     possible_phrases_of_k = ['тыс', 'тыс.', 'к', 'К']
 
@@ -69,14 +71,18 @@ def parse_input(input_text):
     for char in possible_phrases_of_k:
         input_text = input_text.replace(char, 'k')
 
-    input_text = input_text.replace(" ", '')
+    input_text = input_text.replace(' ', '')
     input_text = input_text.replace(',', '.')
+    input_text = input_text.replace('€', '')
 
     # allowed chars check
     allowed_phrases = set('0123456789mMKk.')
     if not set(input_text).issubset(allowed_phrases):
         st.error(_("Error: Invalid character."))
         return 0
+
+    if input_text[-1]=='.':
+        input_text = input_text[:-1]
 
     # extraction of number and suffix
     number = ''
