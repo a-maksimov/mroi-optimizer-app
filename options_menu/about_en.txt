@@ -84,7 +84,9 @@ If some elements at a lower level of granularity are missing at a certain level,
 
 10. Set optimization parameters: Planned budget (for Spend based optimization), Target contribution (for Goal based optimization).
 Also set the limits for allowable changes in expenses for various variables.
+
 **Hint**: It is not recommended to deviate from the current expenses by more than 30%.
 
 Perform budget optimization or goal optimization by clicking the "Optimize" button.
+
 **Hint**: It is advisable to perform optimization scenarios with Yearly periodicity set.
