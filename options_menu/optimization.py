@@ -242,15 +242,26 @@ def opt_page(dataframe):
         with right_column:
             st.metric('MROI',
                       value=f'{round(simulated_total_mroi, 2)}')
+
     # after optimization
+    # send message on the optimization success or failure
     else:
-        # send message on the optimization success or failure
         opt_string = st.session_state['tracking']['select_scenario_track']
-        with success_placeholder:
-            if st.session_state['tracking']['success']:
-                st.success(f'{opt_string} {_("successfully converged.")}')
-            else:
-                st.error(f'{opt_string} {_("did not converge to the desired criteria.")}')
+        if st.session_state['tracking']['spend_optimized_track'] and\
+                st.session_state['tracking']['select_scenario_track'] == _('Spend based optimization'):
+            with success_placeholder:
+                if st.session_state['tracking']['success']:
+                    st.success(f'{opt_string} {_("successfully converged.")}')
+                else:
+                    st.error(f'{opt_string} {_("did not converge to the desired criteria.")}')
+        elif st.session_state['tracking']['goal_optimized_track'] and\
+                st.session_state['tracking']['select_scenario_track'] == _('Goal based optimization'):
+            with success_placeholder:
+                if st.session_state['tracking']['success']:
+                    st.success(f'{opt_string} {_("successfully converged.")}')
+        else:
+            success_placeholder.empty()
+
         # access optimized top metrics calculated and saved in the session state by optimized_top_metrics() function
         # call inside calculate_opt
         optimized_total_spend = st.session_state['tracking']['optimized_spend']
