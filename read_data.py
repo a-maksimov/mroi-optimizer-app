@@ -1,9 +1,10 @@
 import pandas as pd
 from translations import _, translate_table
 
+periodicity_list = ['Weekly', 'Monthly', 'Yearly']
 granularity_levels = ['Dealership', 'Channel', 'Format', 'Product']
 numeric_variables = ['Contribution', 'Spend', 'Revenue Calculated', 'Marginal Contribution']
-periodicity_list = ['Weekly', 'Monthly', 'Yearly']
+
 target_products = [
     'Brand',
     'Product_1',

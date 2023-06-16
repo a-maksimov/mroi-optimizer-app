@@ -22,9 +22,8 @@ def handle_periodicity():
     # delete optimized dataframe if it is in the session state
     reset_optimization()
 
-    # save selected periodicity index
-    periodicity_list = [_(periodicity) for periodicity in read_data.periodicity_list]
-    st.session_state['tracking']['periodicity_track'] = periodicity_list.index(st.session_state['periodicity'])
+    # save selected periodicity
+    st.session_state['tracking']['periodicity_track'] = st.session_state['periodicity']
 
 
 def multiselect_callback(key, options, by_checkbox=False):
@@ -267,14 +266,21 @@ def render_sidebar(dataframe):
     date_range = render_date(dataframe)
     selection_dict.update({'date_range': date_range})
 
-    # TODO: reset planning and optimization on change of periodicity
+    # exclude Weekly granularity for other than Specification
+    periodicity_list = [_(periodicity) for periodicity in read_data.periodicity_list]
+    if not st.session_state['tracking']['menu_track'] == _('Specification'):
+        periodicity_list.remove(_('Weekly'))
+        if st.session_state['tracking']['periodicity_track'] == _('Weekly'):
+            st.session_state['tracking']['periodicity_track'] = _('Monthly')
+
     # create periodicity selection widget
     if 'periodicity_track' not in st.session_state['tracking']:
-        st.session_state['tracking']['periodicity_track'] = 2
+        st.session_state['tracking']['periodicity_track'] = _('Yearly')
+
     periodicity = st.sidebar.selectbox(
         _('Select periodicity'),
-        options=[_(periodicity) for periodicity in read_data.periodicity_list],
-        index=st.session_state['tracking']['periodicity_track'],
+        options=periodicity_list,
+        index=periodicity_list.index(st.session_state['tracking']['periodicity_track']),
         key='periodicity',
         on_change=handle_periodicity
     )

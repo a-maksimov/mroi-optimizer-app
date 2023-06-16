@@ -34,24 +34,29 @@ In the **"Specification"** section, you can view the results of MMM modeling in 
 
 Above the table are macro indicators for the selected granularity level.
 
-## Planning
+## Analyze
 
-The **"Planning"** section allows you to plan the budget size and allocation based on historical data and MMM results.
+The **"Analyze"** section allows you to plan the budget size and allocation based on historical data and MMM results.
 
 The first scenario is **"What if?"** What if you plan to increase or decrease media marketing investments next year?
 Enter a new budget and track how macro indicators change.
 The modeling takes into account the proportions of budget distribution that were in historical data, as well as the effect of diminishing marginal utility.
 
-Often existing budget allocation is not optimal.
-To address this problem, two other planning scenarios are proposed: **spend based optimization** and **goal based optimization**.
+## Optimization
 
-The spend **based optimization** scenario allows to maximize the expected return on investment while satisfying budget constraints.
-The **goal based optimization** scenario allows to achieve the desired business goals while minimizing the budget.
+Often existing budget allocation is not optimal.
+To address this problem, in the **«Optimization»** section two other planning scenarios are suggested: **Spend based optimization** and **Goal based optimization**.
+
+The **Spend based optimization** scenario allows to maximize the expected return on investment while satisfying budget constraints.
+The **Goal based optimization** scenario allows to achieve the desired business goals while minimizing the budget.
 
 # Application usage instructions
 
 1. Go to the **"Specification"** section of the main menu.
-2. Select the time interval for analysis and the frequency.
+
+2. Select the analysis date range and the periodicity.
+**Hint:** Для планирования на год следует выбрать в календаре полный год или последние 12 месяцев.
+
 3. Choose the level of granularity.
 
 For example, to analyze marketing campaigns for products on TV and social media, select:
@@ -67,10 +72,19 @@ If some elements at a lower level of granularity are missing at a certain level,
 
 4. Evaluate total media marketing expenses, total contribution to sales, calculated total revenue, and MROI.
 
-5. Go to the **"Planning"** section of the main menu.
+5. Go to the **"Analyze"** section of the main menu.
 
 6. Review the saturation curves.
 
 7. Enter the planned budget and monitor how macro indicators change.
 
-8. Perform spend based optimization or goal based optimization.
+8. Go to the main menu item "Optimization".
+
+9. Choose an optimization scenario: Budget Optimization or Goal Optimization.
+
+10. Set optimization parameters: Planned budget (for Spend based optimization), Target contribution (for Goal based optimization).
+Also set the limits for allowable changes in expenses for various variables.
+**Hint**: It is not recommended to deviate from the current expenses by more than 30%.
+
+Perform budget optimization or goal optimization by clicking the "Optimize" button.
+**Hint**: It is advisable to perform optimization scenarios with Yearly periodicity set.

@@ -183,6 +183,9 @@ msgstr "Дисплей"
 msgid "Video"
 msgstr "Видео"
 
+msgid "Digital Ads"
+msgstr "Интернет-реклама"
+
 msgid "Enter planned budget"
 msgstr "Введите планируемый бюджет"
 

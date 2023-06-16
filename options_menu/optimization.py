@@ -26,16 +26,13 @@ def goal_input():
     """
     Input for target contribution for goal based optimization.
     """
-    # 'display target contribution' is initialized in calculate_opt
     input_goal = st.session_state['tracking']['display_target_contribution']
-    input_goal = '{:.2f}'.format(input_goal)
+    value = utils.display_volume(input_goal)
 
     st.text_input(f'{_("Enter target contribution")}, {_("kg")}',
-                  value=input_goal,
+                  value=value,
                   key='target_contribution',
                   on_change=handle_goal_input)
-
-    input_goal = float(input_goal)
 
     if input_goal > st.session_state['tracking']['display_target_contribution'] * 2:
         st.error(_('Error: Number too large.'))

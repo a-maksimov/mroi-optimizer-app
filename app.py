@@ -16,18 +16,23 @@ st.title(':chart_with_upwards_trend: MROI Optimizer App')
 
 st.divider()
 
-# load the transformed and translated dataframe
-df = read_data(data)
-
 # initialize dictionary in session state for app state tracking
 if 'tracking' not in st.session_state:
     st.session_state['tracking'] = dict()
 
-# create sidebar
-selection_dict = render_sidebar(df)
+# load the transformed and translated dataframe
+df = read_data(data)
 
 # create options menu
 selected = menu.menu()
+
+# initialize tracking menu
+if 'menu_track' not in st.session_state['tracking']:
+    st.session_state['tracking']['menu_track'] = _('Specification')
+st.session_state['tracking']['menu_track'] = selected
+
+# create sidebar
+selection_dict = render_sidebar(df)
 
 # create pages
 if selected == _('About'):
